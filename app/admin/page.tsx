@@ -376,7 +376,7 @@ export default function AdminDashboard() {
           {toasts.map((toast) => (
             <div
               key={toast.id}
-              className={`p-4 rounded-lg shadow-lg flex items-center gap-3 animate-slide-in ${
+              className={`p-4 rounded-lg shadow-lg flex items-center gap-3 ${
                 toast.type === 'success' ? 'bg-green-500 text-white' :
                 toast.type === 'error' ? 'bg-red-500 text-white' :
                 'bg-blue-500 text-white'
