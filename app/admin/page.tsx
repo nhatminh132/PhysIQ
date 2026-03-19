@@ -97,7 +97,10 @@ export default function AdminDashboard() {
       const res = await fetch('/api/quiz-questions?include_inactive=true');
       const data = await res.json();
       console.log('Questions API response:', data);
-      setQuestions(data.questions || []);
+      const newQuestions = data.questions || [];
+      console.log('Setting questions count:', newQuestions.length);
+      setQuestions([...newQuestions]);
+      console.log('After setQuestions, state should be:', newQuestions.length);
     } catch (err) {
       console.error('Fetch questions error:', err);
     }
@@ -109,6 +112,10 @@ export default function AdminDashboard() {
     const res = await fetch('/api/quiz-sets', { headers: { Authorization: `Bearer ${t}` } });
     if (res.ok) setQuizSets((await res.json()).quiz_sets || []);
   }, []);
+
+  useEffect(() => {
+    console.log('Questions state updated:', questions.length, questions);
+  }, [questions]);
 
   useEffect(() => {
     if (!isAuth) return;
