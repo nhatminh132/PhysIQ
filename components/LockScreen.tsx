@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Shield, Wifi, WifiOff, Clock, AlertTriangle, Ban } from 'lucide-react';
+import { Shield, Wifi, WifiOff, Clock, AlertTriangle, Ban, RefreshCw } from 'lucide-react';
 
 interface LockScreenProps {
   errorCode: string;
@@ -203,43 +203,29 @@ export default function LockScreen({
         )}
 
         {isRevoked ? (
-          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 mb-6">
-            <p className="text-sm text-destructive/80 text-center">
-              Bạn không thể sử dụng ứng dụng này. Vui lòng liên hệ chủ sở hữu để được cấp license mới.
-            </p>
-          </div>
-        ) : activateMode ? (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Nhập License Key của bạn
-              </label>
-              <input
-                type="text"
-                value={activateKey}
-                onChange={(e) => setActivateKey(e.target.value.toUpperCase())}
-                placeholder="PHY-XXXXXXXXXXXXXXXXXXXXXXXX"
-                className="w-full p-3 border border-border bg-secondary/30 rounded-lg text-center font-mono tracking-wider"
-                autoFocus
-                disabled={isLoading}
-              />
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setActivateMode(false)}
-                className="flex-1 py-3 px-4 border border-border rounded-lg hover:bg-secondary/50 transition-colors"
-                disabled={isLoading}
-              >
-                Quay lại
-              </button>
-              <button
-                onClick={handleActivate}
-                disabled={!activateKey.trim() || isLoading}
-                className="flex-1 py-3 px-4 bg-foreground text-background font-semibold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
-              >
-                {isLoading ? 'Đang xác thực...' : 'Kích hoạt'}
-              </button>
-            </div>
+          <div className="space-y-3">
+            <button
+              onClick={() => window.location.reload()}
+              disabled={isLoading}
+              className="w-full py-3 px-4 bg-foreground text-background font-semibold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              <RefreshCw size={18} className={isLoading ? 'animate-spin' : ''} />
+              {isLoading ? 'Đang kiểm tra...' : 'Kiểm tra lại'}
+            </button>
+            <button
+              onClick={() => {
+                localStorage.removeItem('physiq_license_key');
+                localStorage.removeItem('physiq_license_info');
+                localStorage.removeItem('physiq_grace_end');
+                localStorage.removeItem('physiq_grace_key');
+                localStorage.removeItem('physiq_revoked_info');
+                localStorage.removeItem('physiq_instance_id');
+                window.location.reload();
+              }}
+              className="w-full py-3 px-4 border border-red-500/30 text-red-500/70 rounded-lg hover:bg-red-500/10 transition-colors text-sm"
+            >
+              Xóa License &amp; Thử lại
+            </button>
           </div>
         ) : (
           <div className="space-y-3">
@@ -267,6 +253,7 @@ export default function LockScreen({
                 localStorage.removeItem('physiq_license_info');
                 localStorage.removeItem('physiq_grace_end');
                 localStorage.removeItem('physiq_grace_key');
+                localStorage.removeItem('physiq_revoked_info');
                 localStorage.removeItem('physiq_instance_id');
                 window.location.reload();
               }}

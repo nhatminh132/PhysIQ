@@ -31,7 +31,7 @@ interface UseLicenseReturn {
 }
 
 const GRACE_PERIOD_MS = parseInt(process.env.NEXT_PUBLIC_LICENSE_GRACE_PERIOD_MS || '86400000', 10);
-const CHECKIN_INTERVAL_MS = parseInt(process.env.NEXT_PUBLIC_LICENSE_CHECKIN_INTERVAL_MS || '300000', 10);
+const CHECKIN_INTERVAL_MS = parseInt(process.env.NEXT_PUBLIC_LICENSE_CHECKIN_INTERVAL_MS || '15000', 10);
 
 function generateInstanceId(): string {
   const stored = typeof window !== 'undefined' ? localStorage.getItem('physiq_instance_id') : null;
@@ -86,22 +86,34 @@ export function useLicense(licenseKey: string | null): UseLicenseReturn {
   }, [licenseKey]);
 
   const checkLicense = useCallback(async () => {
-    if (!licenseKey) {
-      const savedKey = localStorage.getItem('physiq_license_key');
-      if (savedKey) {
-        licenseKey = savedKey;
-      } else {
-        setStatus('invalid');
-        setError({ code: 'NO_LICENSE', message: 'Vui lòng nhập license key để tiếp tục.' });
-        setIsLoading(false);
-        return;
+    let key = licenseKey || localStorage.getItem('physiq_license_key') || undefined;
+    
+    if (!key) {
+      const revokedInfo = localStorage.getItem('physiq_revoked_info');
+      if (revokedInfo) {
+        try {
+          const info = JSON.parse(revokedInfo);
+          setError({
+            code: 'LICENSE_REVOKED',
+            message: 'License đã bị vô hiệu hóa.',
+            revokedAt: info.revokedAt,
+            revokedReason: info.revokedReason,
+          });
+          setStatus('locked');
+          setIsLoading(false);
+          return;
+        } catch { /* ignore */ }
       }
+      setStatus('invalid');
+      setError({ code: 'NO_LICENSE', message: 'Vui lòng nhập license key để tiếp tục.' });
+      setIsLoading(false);
+      return;
     }
 
     if (!navigator.onLine) {
       const graceEnd = localStorage.getItem('physiq_grace_end');
       const graceKey = localStorage.getItem('physiq_grace_key');
-      if (graceEnd && graceKey === licenseKey) {
+      if (graceEnd && graceKey === key) {
         const remaining = parseInt(graceEnd, 10) - Date.now();
         if (remaining > 0) {
           enterGracePeriod(remaining);
@@ -122,7 +134,7 @@ export function useLicense(licenseKey: string | null): UseLicenseReturn {
     }
 
     try {
-      console.log('Starting license check for:', licenseKey);
+      console.log('Starting license check for:', key);
       const instanceId = generateInstanceId();
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -131,7 +143,7 @@ export function useLicense(licenseKey: string | null): UseLicenseReturn {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          license_key: licenseKey,
+          license_key: key,
           instance_id: instanceId,
           domain: typeof window !== 'undefined' ? window.location.hostname : '',
           user_agent: typeof window !== 'undefined' ? navigator.userAgent : '',
@@ -147,7 +159,7 @@ export function useLicense(licenseKey: string | null): UseLicenseReturn {
       localStorage.removeItem('physiq_revoked_info');
 
       if (data.success) {
-        localStorage.setItem('physiq_license_key', licenseKey);
+        localStorage.setItem('physiq_license_key', key);
         localStorage.setItem('physiq_license_info', JSON.stringify({
           licenseKey: data.license_key,
           ownerName: data.owner_name,
@@ -167,7 +179,6 @@ export function useLicense(licenseKey: string | null): UseLicenseReturn {
         console.log('License status set to valid');
         setError(null);
         setGracePeriodEnd(null);
-        localStorage.removeItem('physiq_revoked_info');
         setIsLoading(false);
         console.log('isLoading set to false');
         localStorage.removeItem('physiq_grace_end');
@@ -178,7 +189,6 @@ export function useLicense(licenseKey: string | null): UseLicenseReturn {
       } else {
         if (data.error === 'LICENSE_REVOKED') {
           clearTimers();
-          localStorage.removeItem('physiq_license_key');
           localStorage.removeItem('physiq_grace_end');
           localStorage.removeItem('physiq_grace_key');
           localStorage.setItem('physiq_revoked_info', JSON.stringify({
@@ -203,8 +213,8 @@ export function useLicense(licenseKey: string | null): UseLicenseReturn {
       const isAbort = err instanceof Error && err.name === 'AbortError';
       
       const graceEnd = localStorage.getItem('physiq_grace_end');
-      const graceKey = localStorage.getItem('physiq_license_key');
-      if (graceEnd && licenseKey && graceKey === licenseKey) {
+      const graceKey = localStorage.getItem('physiq_grace_key');
+      if (graceEnd && key && graceKey === key) {
         const remaining = parseInt(graceEnd, 10) - Date.now();
         if (remaining > 0) {
           enterGracePeriod(remaining);
@@ -213,7 +223,7 @@ export function useLicense(licenseKey: string | null): UseLicenseReturn {
           setStatus('locked');
           setError({ code: 'TIMEOUT', message: isAbort ? 'Kết nối bị timeout. Kiểm tra Supabase URL.' : 'Không thể kết nối đến server xác thực.' });
         }
-      } else if (licenseKey) {
+      } else if (key) {
         enterGracePeriod(GRACE_PERIOD_MS);
         setError({ code: 'TIMEOUT', message: isAbort ? 'Kết nối bị timeout. Kiểm tra Supabase URL.' : 'Không thể kết nối đến server.' });
       } else {
@@ -224,29 +234,7 @@ export function useLicense(licenseKey: string | null): UseLicenseReturn {
   }, [licenseKey, enterGracePeriod, clearTimers]);
 
   useEffect(() => {
-    if (!licenseKey) {
-      const savedKey = localStorage.getItem('physiq_license_key');
-      if (savedKey) {
-        checkLicense();
-      } else {
-        const revokedInfo = localStorage.getItem('physiq_revoked_info');
-        if (revokedInfo) {
-          try {
-            const info = JSON.parse(revokedInfo);
-            setError({
-              code: 'LICENSE_REVOKED',
-              message: 'License đã bị vô hiệu hóa.',
-              revokedAt: info.revokedAt,
-              revokedReason: info.revokedReason,
-            });
-          } catch { /* ignore */ }
-        }
-        setStatus('invalid');
-        setIsLoading(false);
-      }
-    } else {
-      checkLicense();
-    }
+    checkLicense();
 
     const handleOnline = () => {
       if (status === 'grace_period' || status === 'locked') {
