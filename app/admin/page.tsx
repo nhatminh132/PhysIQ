@@ -44,8 +44,6 @@ interface QuizSet {
   id: string;
   name: string;
   description: string | null;
-  subject: string | null;
-  grade: string | null;
   question_count: number;
   is_active: boolean;
   created_at: string;
@@ -83,7 +81,7 @@ export default function AdminDashboard() {
   const [newQ, setNewQ] = useState({ question_text: '', options: ['', '', '', ''], correct_index: 0, difficulty: 'easy' as 'easy' | 'medium' | 'hard', phase: '', quiz_set_id: '' });
   const [editQ, setEditQ] = useState<Question | null>(null);
   const [newL, setNewL] = useState({ owner_name: '', max_activations: 1, quiz_set_id: '' });
-  const [newQS, setNewQS] = useState({ name: '', description: '', subject: '', grade: '' });
+  const [newQS, setNewQS] = useState({ name: '', description: '' });
   const [editQS, setEditQS] = useState<QuizSet | null>(null);
   const [assignQS, setAssignQS] = useState<{ licenseId: string; quizSetId: string } | null>(null);
 
@@ -227,7 +225,7 @@ export default function AdminDashboard() {
     const t = sessionStorage.getItem('physiq_admin_pass');
     if (!t) return;
     const r = await fetch('/api/quiz-sets', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` }, body: JSON.stringify(newQS) });
-    if (r.ok) { addToast('success', 'Tạo Quiz Set!'); fetchQuizSets(); setNewQS({ name: '', description: '', subject: '', grade: '' }); }
+    if (r.ok) { addToast('success', 'Tạo Quiz Set!'); fetchQuizSets(); setNewQS({ name: '', description: '' }); }
     else addToast('error', 'Lỗi!');
   };
 
@@ -679,10 +677,6 @@ export default function AdminDashboard() {
                 <form onSubmit={updateQuizSet} className="space-y-4">
                   <input value={editQS.name} onChange={(e) => setEditQS({ ...editQS, name: e.target.value })} placeholder="Tên Quiz Set" className="w-full p-3 border border-border rounded bg-background" required />
                   <textarea value={editQS.description || ''} onChange={(e) => setEditQS({ ...editQS, description: e.target.value })} placeholder="Mô tả" className="w-full p-3 border border-border rounded bg-background h-20" />
-                  <div className="grid grid-cols-2 gap-4">
-                    <input value={editQS.subject || ''} onChange={(e) => setEditQS({ ...editQS, subject: e.target.value })} placeholder="Môn học" className="p-3 border border-border rounded bg-background" />
-                    <input value={editQS.grade || ''} onChange={(e) => setEditQS({ ...editQS, grade: e.target.value })} placeholder="Lớp" className="p-3 border border-border rounded bg-background" />
-                  </div>
                   <div className="flex gap-3">
                     <button type="submit" className="px-6 py-2 bg-foreground text-background font-semibold rounded">Lưu</button>
                     <button type="button" onClick={() => setEditQS(null)} className="px-6 py-2 border border-border rounded">Hủy</button>
@@ -695,10 +689,6 @@ export default function AdminDashboard() {
                 <form onSubmit={createQuizSet} className="space-y-4">
                   <input value={newQS.name} onChange={(e) => setNewQS({ ...newQS, name: e.target.value })} placeholder="Tên Quiz Set" className="w-full p-3 border border-border rounded bg-background" required />
                   <textarea value={newQS.description} onChange={(e) => setNewQS({ ...newQS, description: e.target.value })} placeholder="Mô tả" className="w-full p-3 border border-border rounded bg-background h-20" />
-                  <div className="grid grid-cols-2 gap-4">
-                    <input value={newQS.subject} onChange={(e) => setNewQS({ ...newQS, subject: e.target.value })} placeholder="Môn học" className="p-3 border border-border rounded bg-background" />
-                    <input value={newQS.grade} onChange={(e) => setNewQS({ ...newQS, grade: e.target.value })} placeholder="Lớp" className="p-3 border border-border rounded bg-background" />
-                  </div>
                   <button type="submit" className="px-6 py-2 bg-foreground text-background font-semibold rounded">Tạo</button>
                 </form>
               </div>
@@ -717,9 +707,7 @@ export default function AdminDashboard() {
                         <p className="font-medium mb-1">{qs.name}</p>
                         {qs.description && <p className="text-sm text-muted-foreground mb-1">{qs.description}</p>}
                         <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                          {qs.subject && <span>{qs.subject}</span>}
-                          {qs.grade && <span>• {qs.grade}</span>}
-                          <span>• {qs.question_count} câu hỏi</span>
+                          <span>{qs.question_count} câu hỏi</span>
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-2 shrink-0">
