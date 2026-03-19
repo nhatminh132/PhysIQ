@@ -144,8 +144,9 @@ export function useLicense(licenseKey: string | null): UseLicenseReturn {
       const data = await response.json();
       console.log('License check response:', data);
 
+      localStorage.removeItem('physiq_revoked_info');
+
       if (data.success) {
-        localStorage.removeItem('physiq_revoked_info');
         localStorage.setItem('physiq_license_key', licenseKey);
         localStorage.setItem('physiq_license_info', JSON.stringify({
           licenseKey: data.license_key,
@@ -166,6 +167,7 @@ export function useLicense(licenseKey: string | null): UseLicenseReturn {
         console.log('License status set to valid');
         setError(null);
         setGracePeriodEnd(null);
+        localStorage.removeItem('physiq_revoked_info');
         setIsLoading(false);
         console.log('isLoading set to false');
         localStorage.removeItem('physiq_grace_end');
