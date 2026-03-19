@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const difficulty = searchParams.get('difficulty');
-    const limit = parseInt(searchParams.get('limit') || '30', 10);
+    const limit = parseInt(searchParams.get('limit') || '100', 10);
     const includeInactive = searchParams.get('include_inactive') === 'true';
     const quizSetId = searchParams.get('quiz_set_id');
 
@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('questions')
       .select('id, question_text, options, correct_index, difficulty, phase, explanation, quiz_set_id')
+      .order('created_at', { ascending: false })
       .limit(limit);
 
     if (!includeInactive) {

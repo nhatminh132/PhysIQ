@@ -94,7 +94,9 @@ export default function AdminDashboard() {
 
   const fetchQuestions = useCallback(async () => {
     try {
-      const res = await fetch('/api/quiz-questions?include_inactive=true');
+      const res = await fetch('/api/quiz-questions?include_inactive=true&t=' + Date.now(), {
+        cache: 'no-store'
+      });
       const data = await res.json();
       console.log('Questions API response:', data);
       const newQuestions = data.questions || [];
