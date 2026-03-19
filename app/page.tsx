@@ -202,6 +202,12 @@ function PhysIQApp() {
     }
   }, [status]);
 
+  useEffect(() => {
+    if ((status === 'locked' || status === 'invalid') && (screen === 'quiz' || screen === 'start' || screen === 'result')) {
+      setScreen('locked');
+    }
+  }, [status, screen]);
+
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (password === PASSWORD) {
@@ -223,6 +229,8 @@ function PhysIQApp() {
     if (isCorrect) {
       playCorrect();
       setFeedback('correct');
+
+      checkLicense();
 
       const newAnswers = [...answers, optionIndex];
       setAnswers(newAnswers);
