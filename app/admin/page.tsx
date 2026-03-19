@@ -55,6 +55,7 @@ export default function AdminDashboard() {
   const [licenses, setLicenses] = useState<License[]>([]);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [quizSets, setQuizSets] = useState<QuizSet[]>([]);
+  const [filterQuizSet, setFilterQuizSet] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ type: string; text: string } | null>(null);
   const [expandId, setExpandId] = useState<string | null>(null);
   const [revokeTarget, setRevokeTarget] = useState<string | null>(null);
@@ -418,33 +419,58 @@ export default function AdminDashboard() {
 
             <div className="bg-secondary/30 border border-border rounded-lg overflow-hidden">
               <div className="p-4 border-b border-border flex items-center justify-between">
-                <h2 className="font-semibold">Tất cả ({questions.length})</h2>
+                <div className="flex items-center gap-3">
+                  <h2 className="font-semibold">Tất cả ({questions.length})</h2>
+                  <select 
+                    value={filterQuizSet || ''} 
+                    onChange={(e) => setFilterQuizSet(e.target.value || null)}
+                    className="p-1.5 text-sm border border-border rounded bg-background"
+                  >
+                    <option value="">Tất cả Quiz Set</option>
+                    {quizSets.map((qs) => (
+                      <option key={qs.id} value={qs.id}>{qs.name}</option>
+                    ))}
+                  </select>
+                </div>
                 <button onClick={fetchQuestions} className="text-sm text-muted-foreground hover:text-foreground"><RefreshCw size={14} className="inline mr-1" />Refresh</button>
               </div>
               <div className="divide-y divide-border max-h-[600px] overflow-y-auto">
-                {questions.map((q) => (
-                  <div key={q.id} className="p-4 hover:bg-secondary/20">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <p className="font-medium mb-1">{q.question_text}</p>
-                        <div className="flex flex-wrap gap-2 text-xs">
-                          {q.options.map((opt, i) => (
-                            <span key={i} className={`px-2 py-0.5 rounded ${i === q.correct_index ? 'bg-green-500/20 text-green-500' : 'bg-secondary'}`}>{i + 1}. {opt}</span>
-                          ))}
+                {questions
+                  .filter(q => !filterQuizSet || q.quiz_set_id === filterQuizSet)
+                  .map((q) => {
+                    const qs = quizSets.find(qs => qs.id === q.quiz_set_id);
+                    return (
+                    <div key={q.id} className="p-4 hover:bg-secondary/20">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="font-medium">{q.question_text}</p>
+                          </div>
+                          <div className="flex flex-wrap gap-2 text-xs mb-2">
+                            {q.options.map((opt, i) => (
+                              <span key={i} className={`px-2 py-0.5 rounded ${i === q.correct_index ? 'bg-green-500/20 text-green-500' : 'bg-secondary'}`}>{i + 1}. {opt}</span>
+                            ))}
+                          </div>
+                          <div className="flex flex-wrap gap-2 text-xs">
+                            <span className={`px-2 py-0.5 rounded ${q.difficulty === 'easy' ? 'bg-green-500/20 text-green-500' : q.difficulty === 'medium' ? 'bg-yellow-500/20 text-yellow-500' : 'bg-red-500/20 text-red-500'}`}>
+                              {q.difficulty === 'easy' ? 'Dễ' : q.difficulty === 'medium' ? 'Trung bình' : 'Khó'}
+                            </span>
+                            <span className={`px-2 py-0.5 rounded ${q.quiz_set_id ? 'bg-blue-500/20 text-blue-500' : 'bg-secondary text-muted-foreground'}`}>
+                              {qs?.name || 'Mặc định'}
+                            </span>
+                            {q.phase && <span className="px-2 py-0.5 rounded bg-secondary text-muted-foreground">{q.phase}</span>}
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-2 shrink-0">
-                        <span className={`text-xs px-2 py-1 rounded ${q.difficulty === 'easy' ? 'bg-green-500/20 text-green-500' : q.difficulty === 'medium' ? 'bg-yellow-500/20 text-yellow-500' : 'bg-red-500/20 text-red-500'}`}>
-                          {q.difficulty === 'easy' ? 'Dễ' : q.difficulty === 'medium' ? 'Trung bình' : 'Khó'}
-                        </span>
-                        <div className="flex gap-1">
-                          <button onClick={() => setEditQ(q)} className="p-1.5 text-xs border border-border rounded hover:bg-secondary/50">Sửa</button>
-                          <button onClick={() => deleteQuestion(q.id)} className="p-1.5 text-xs border border-red-500/30 text-red-500 rounded hover:bg-red-500/10"><Trash2 size={12} /></button>
+                        <div className="flex flex-col items-end gap-2 shrink-0">
+                          <div className="flex gap-1">
+                            <button onClick={() => setEditQ(q)} className="p-1.5 text-xs border border-border rounded hover:bg-secondary/50">Sửa</button>
+                            <button onClick={() => deleteQuestion(q.id)} className="p-1.5 text-xs border border-red-500/30 text-red-500 rounded hover:bg-red-500/10"><Trash2 size={12} /></button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 {questions.length === 0 && <div className="p-8 text-center text-muted-foreground">Chưa có câu hỏi!</div>}
               </div>
             </div>
