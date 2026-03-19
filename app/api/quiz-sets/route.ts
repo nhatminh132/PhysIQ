@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { name, description } = body;
+    const { name } = body;
 
     if (!name) {
       return Response.json({ error: 'Name is required' }, { status: 400 });
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     
     const { data, error } = await supabase
       .from('quiz_sets')
-      .insert({ name, description })
+      .insert({ name })
       .select()
       .single();
 
@@ -72,7 +72,7 @@ export async function PUT(request: Request) {
     }
 
     const body = await request.json();
-    const { id, name, description, is_active } = body;
+    const { id, name, is_active } = body;
 
     if (!id) {
       return Response.json({ error: 'ID is required' }, { status: 400 });
@@ -82,7 +82,7 @@ export async function PUT(request: Request) {
     
     const { data, error } = await supabase
       .from('quiz_sets')
-      .update({ name, description, is_active, updated_at: new Date().toISOString() })
+      .update({ name, is_active, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
       .single();

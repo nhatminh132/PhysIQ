@@ -43,7 +43,6 @@ interface Question {
 interface QuizSet {
   id: string;
   name: string;
-  description: string | null;
   question_count: number;
   is_active: boolean;
   created_at: string;
@@ -81,7 +80,7 @@ export default function AdminDashboard() {
   const [newQ, setNewQ] = useState({ question_text: '', options: ['', '', '', ''], correct_index: 0, difficulty: 'easy' as 'easy' | 'medium' | 'hard', phase: '', quiz_set_id: '' });
   const [editQ, setEditQ] = useState<Question | null>(null);
   const [newL, setNewL] = useState({ owner_name: '', max_activations: 1, quiz_set_id: '' });
-  const [newQS, setNewQS] = useState({ name: '', description: '' });
+  const [newQS, setNewQS] = useState({ name: '' });
   const [editQS, setEditQS] = useState<QuizSet | null>(null);
   const [assignQS, setAssignQS] = useState<{ licenseId: string; quizSetId: string } | null>(null);
 
@@ -225,7 +224,7 @@ export default function AdminDashboard() {
     const t = sessionStorage.getItem('physiq_admin_pass');
     if (!t) return;
     const r = await fetch('/api/quiz-sets', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` }, body: JSON.stringify(newQS) });
-    if (r.ok) { addToast('success', 'Tạo Quiz Set!'); fetchQuizSets(); setNewQS({ name: '', description: '' }); }
+    if (r.ok) { addToast('success', 'Tạo Quiz Set!'); fetchQuizSets(); setNewQS({ name: '' }); }
     else addToast('error', 'Lỗi!');
   };
 
@@ -676,7 +675,6 @@ export default function AdminDashboard() {
                 <h2 className="text-lg font-semibold mb-4">Sửa Quiz Set</h2>
                 <form onSubmit={updateQuizSet} className="space-y-4">
                   <input value={editQS.name} onChange={(e) => setEditQS({ ...editQS, name: e.target.value })} placeholder="Tên Quiz Set" className="w-full p-3 border border-border rounded bg-background" required />
-                  <textarea value={editQS.description || ''} onChange={(e) => setEditQS({ ...editQS, description: e.target.value })} placeholder="Mô tả" className="w-full p-3 border border-border rounded bg-background h-20" />
                   <div className="flex gap-3">
                     <button type="submit" className="px-6 py-2 bg-foreground text-background font-semibold rounded">Lưu</button>
                     <button type="button" onClick={() => setEditQS(null)} className="px-6 py-2 border border-border rounded">Hủy</button>
@@ -687,8 +685,7 @@ export default function AdminDashboard() {
               <div className="bg-secondary/30 border border-border rounded-lg p-6">
                 <h2 className="text-lg font-semibold mb-4"><Plus size={18} className="inline mr-2" />Tạo Quiz Set</h2>
                 <form onSubmit={createQuizSet} className="space-y-4">
-                  <input value={newQS.name} onChange={(e) => setNewQS({ ...newQS, name: e.target.value })} placeholder="Tên Quiz Set" className="w-full p-3 border border-border rounded bg-background" required />
-                  <textarea value={newQS.description} onChange={(e) => setNewQS({ ...newQS, description: e.target.value })} placeholder="Mô tả" className="w-full p-3 border border-border rounded bg-background h-20" />
+                  <input value={newQS.name} onChange={(e) => setNewQS({ name: e.target.value })} placeholder="Tên Quiz Set" className="w-full p-3 border border-border rounded bg-background" required />
                   <button type="submit" className="px-6 py-2 bg-foreground text-background font-semibold rounded">Tạo</button>
                 </form>
               </div>
@@ -705,7 +702,6 @@ export default function AdminDashboard() {
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
                         <p className="font-medium mb-1">{qs.name}</p>
-                        {qs.description && <p className="text-sm text-muted-foreground mb-1">{qs.description}</p>}
                         <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                           <span>{qs.question_count} câu hỏi</span>
                         </div>
