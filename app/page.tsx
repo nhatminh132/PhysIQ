@@ -173,7 +173,7 @@ function PhysIQApp() {
   const fetchQuestions = useCallback(async (quizSetId?: string) => {
     setQuestionsLoading(true);
     try {
-      let url = '/api/questions?limit=30';
+      let url = '/api/quiz-questions?limit=30';
       if (quizSetId) {
         url += `&quiz_set_id=${quizSetId}`;
       }

@@ -94,7 +94,7 @@ export default function AdminDashboard() {
 
   const fetchQuestions = useCallback(async () => {
     try {
-      const res = await fetch('/api/questions?include_inactive=true');
+      const res = await fetch('/api/quiz-questions?include_inactive=true');
       const data = await res.json();
       console.log('Questions API response:', data);
       setQuestions(data.questions || []);
@@ -174,7 +174,7 @@ export default function AdminDashboard() {
     }
     
     try {
-      const r = await fetch('/api/questions', { 
+      const r = await fetch('/api/quiz-questions', { 
         method: 'POST', 
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` }, 
         body: JSON.stringify(body) 
@@ -199,7 +199,7 @@ export default function AdminDashboard() {
     e.preventDefault();
     const t = sessionStorage.getItem('physiq_admin_pass');
     if (!t) return;
-    const r = await fetch('/api/questions', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` }, body: JSON.stringify(editQ) });
+    const r = await fetch('/api/quiz-questions', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` }, body: JSON.stringify(editQ) });
     if (r.ok) { addToast('success', 'Cập nhật!'); fetchQuestions(); setEditQ(null); }
     else addToast('error', 'Lỗi!');
   };
@@ -208,7 +208,7 @@ export default function AdminDashboard() {
     if (!confirm('Xóa?')) return;
     const t = sessionStorage.getItem('physiq_admin_pass');
     if (!t) return;
-    const r = await fetch(`/api/questions?id=${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${t}` } });
+    const r = await fetch(`/api/quiz-questions?id=${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${t}` } });
     if (r.ok) { addToast('success', 'Xóa!'); fetchQuestions(); }
     else addToast('error', 'Lỗi!');
   };
@@ -264,7 +264,7 @@ export default function AdminDashboard() {
     let errorCount = 0;
     
     for (const q of questionsData) {
-      const r = await fetch('/api/questions', {
+      const r = await fetch('/api/quiz-questions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` },
         body: JSON.stringify(q)
