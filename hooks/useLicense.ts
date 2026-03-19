@@ -145,6 +145,7 @@ export function useLicense(licenseKey: string | null): UseLicenseReturn {
       console.log('License check response:', data);
 
       if (data.success) {
+        localStorage.removeItem('physiq_revoked_info');
         localStorage.setItem('physiq_license_key', licenseKey);
         localStorage.setItem('physiq_license_info', JSON.stringify({
           licenseKey: data.license_key,
@@ -176,9 +177,12 @@ export function useLicense(licenseKey: string | null): UseLicenseReturn {
         if (data.error === 'LICENSE_REVOKED') {
           clearTimers();
           localStorage.removeItem('physiq_license_key');
-          localStorage.removeItem('physiq_license_info');
           localStorage.removeItem('physiq_grace_end');
           localStorage.removeItem('physiq_grace_key');
+          localStorage.setItem('physiq_revoked_info', JSON.stringify({
+            revokedAt: data.revoked_at,
+            revokedReason: data.revoked_reason,
+          }));
           setStatus('locked');
           setError({
             code: data.error,
@@ -223,6 +227,18 @@ export function useLicense(licenseKey: string | null): UseLicenseReturn {
       if (savedKey) {
         checkLicense();
       } else {
+        const revokedInfo = localStorage.getItem('physiq_revoked_info');
+        if (revokedInfo) {
+          try {
+            const info = JSON.parse(revokedInfo);
+            setError({
+              code: 'LICENSE_REVOKED',
+              message: 'License đã bị vô hiệu hóa.',
+              revokedAt: info.revokedAt,
+              revokedReason: info.revokedReason,
+            });
+          } catch { /* ignore */ }
+        }
         setStatus('invalid');
         setIsLoading(false);
       }
