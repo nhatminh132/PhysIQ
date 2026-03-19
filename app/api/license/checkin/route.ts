@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: 'LICENSE_INVALID',
+          error: license.status === 'revoked' ? 'LICENSE_REVOKED' : 'LICENSE_INVALID',
           status: license.status,
           message: `License đã bị ${license.status === 'revoked' ? 'vô hiệu hóa' : 'hết hạn'}`,
           revoked_at: license.revoked_at,

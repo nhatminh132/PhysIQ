@@ -1,13 +1,15 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Shield, Wifi, WifiOff, Clock, AlertTriangle } from 'lucide-react';
+import { Shield, Wifi, WifiOff, Clock, AlertTriangle, Ban } from 'lucide-react';
 
 interface LockScreenProps {
   errorCode: string;
   errorMessage: string;
   isGracePeriod?: boolean;
   gracePeriodRemainingMs?: number | null;
+  revokedAt?: string | null;
+  revokedReason?: string | null;
   onRetry?: () => void;
   onActivate?: (key: string) => void;
   isLoading?: boolean;
@@ -32,6 +34,8 @@ export default function LockScreen({
   errorMessage,
   isGracePeriod = false,
   gracePeriodRemainingMs,
+  revokedAt,
+  revokedReason,
   onRetry,
   onActivate,
   isLoading = false,
@@ -60,31 +64,47 @@ export default function LockScreen({
     }
   }, [activateKey, onActivate]);
 
-  const isRevoked = errorCode === 'LICENSE_INVALID' || errorCode === 'LICENSE_REVOKED';
-  const isGrace = isGracePeriod || localRemaining !== null && localRemaining > 0;
-  const isOffline = errorCode === 'OFFLINE' || errorCode === 'NETWORK_ERROR' || errorCode === 'NO_LICENSE' || errorCode === 'NETWORK_ERROR';
+  const isRevoked = errorCode === 'LICENSE_REVOKED';
+  const isGrace = isGracePeriod || (localRemaining !== null && localRemaining > 0);
+  const isOffline = errorCode === 'OFFLINE' || errorCode === 'NETWORK_ERROR' || errorCode === 'NO_LICENSE';
+
+  const formatDate = (dateStr: string | null | undefined) => {
+    if (!dateStr) return null;
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return dateStr;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div
-            className={`w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center ${
+            className={`w-24 h-24 mx-auto mb-6 rounded-2xl flex items-center justify-center ${
               isRevoked
-                ? 'bg-red-500/20'
+                ? 'bg-red-500/20 animate-pulse'
                 : isGrace
                 ? 'bg-yellow-500/20'
                 : 'bg-muted'
             }`}
           >
             {isRevoked ? (
-              <Shield size={40} className="text-red-500" />
+              <Ban size={48} className="text-red-500" />
             ) : isGrace ? (
               <Clock size={40} className="text-yellow-500" />
             ) : isOffline ? (
               <WifiOff size={40} className="text-muted-foreground" />
             ) : (
-              <Wifi size={40} className="text-muted-foreground" />
+              <Shield size={40} className="text-muted-foreground" />
             )}
           </div>
 
@@ -107,39 +127,71 @@ export default function LockScreen({
         </div>
 
         <div
-          className={`p-4 rounded-lg mb-6 ${
+          className={`p-5 rounded-lg mb-6 ${
             isRevoked
-              ? 'bg-red-500/10 border border-red-500/30'
+              ? 'bg-red-500/10 border-2 border-red-500/40'
               : 'bg-secondary/50 border border-border'
           }`}
         >
           {isRevoked && (
-            <div className="flex items-start gap-3 mb-3">
-              <AlertTriangle size={18} className="text-red-500 mt-0.5 shrink-0" />
+            <div className="mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Ban size={20} className="text-red-500" />
+                <p className="text-red-500 font-bold text-lg">LICENSE BỊ KHÓA</p>
+              </div>
+              <p className="text-sm text-red-400/80">
+                {errorMessage || 'License đã bị vô hiệu hóa bởi quản trị viên.'}
+              </p>
+            </div>
+          )}
+
+          {isRevoked && (revokedAt || revokedReason) && (
+            <div className="space-y-2 mb-4 p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+              {revokedReason && (
+                <div className="flex items-start gap-2">
+                  <AlertTriangle size={14} className="text-red-400 mt-0.5" />
+                  <div>
+                    <p className="text-xs text-red-400/60 uppercase tracking-wide">Lý do khóa</p>
+                    <p className="text-sm text-red-300">{revokedReason}</p>
+                  </div>
+                </div>
+              )}
+              {revokedAt && (
+                <div className="flex items-center gap-2">
+                  <Clock size={14} className="text-red-400" />
+                  <div>
+                    <p className="text-xs text-red-400/60 uppercase tracking-wide">Thời gian khóa</p>
+                    <p className="text-sm text-red-300">{formatDate(revokedAt)}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {!isRevoked && (
+            <div className="flex items-start gap-3">
+              <div className={`shrink-0 mt-0.5 ${isRevoked ? 'text-red-500/60' : 'text-muted-foreground'}`}>
+                {isOffline ? <WifiOff size={16} /> : <Shield size={16} />}
+              </div>
               <div>
-                <p className="text-red-500 font-semibold text-sm">License đã bị vô hiệu hóa</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {errorMessage || 'Liên hệ chủ sở hữu để được hỗ trợ.'}
+                <p className={`text-sm font-medium ${isRevoked ? 'text-red-400/80' : 'text-muted-foreground'}`}>
+                  {errorMessage}
                 </p>
+                {errorCode && (
+                  <p className="text-xs text-muted-foreground/50 mt-1 font-mono">
+                    Error: {errorCode}
+                  </p>
+                )}
               </div>
             </div>
           )}
 
-          <div className="flex items-start gap-3">
-            <div className={`shrink-0 mt-0.5 ${isRevoked ? 'text-red-500/60' : 'text-muted-foreground'}`}>
-              {isOffline ? <WifiOff size={16} /> : <Shield size={16} />}
+          {isRevoked && (
+            <div className="flex items-center gap-2 text-xs text-red-400/50 mt-3 pt-3 border-t border-red-500/20">
+              <AlertTriangle size={12} />
+              <span>Liên hệ chủ sở hữu để được cấp license mới hoặc làm rõ.</span>
             </div>
-            <div className={isRevoked ? '' : ''}>
-              <p className={`text-sm font-medium ${isRevoked ? 'text-red-400/80' : 'text-muted-foreground'}`}>
-                {errorMessage}
-              </p>
-              {errorCode && (
-                <p className="text-xs text-muted-foreground/50 mt-1 font-mono">
-                  Error: {errorCode}
-                </p>
-              )}
-            </div>
-          </div>
+          )}
         </div>
 
         {isGrace && (

@@ -374,11 +374,23 @@ function PhysIQApp() {
   };
 
   if (isLoading || questionsLoading) {
+    const isRevoked = error?.code === 'LICENSE_REVOKED';
+    
     return (
       <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground text-sm mb-4">Đang xác thực license...</p>
+          {!isRevoked ? (
+            <>
+              <div className="w-8 h-8 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-muted-foreground text-sm mb-4">Đang xác thực license...</p>
+            </>
+          ) : (
+            <>
+              <div className="w-12 h-12 border-2 border-red-500/20 border-t-red-500 rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-red-500/80 text-sm mb-2 font-semibold">License đã bị khóa!</p>
+              <p className="text-muted-foreground/60 text-xs mb-4">{error?.message}</p>
+            </>
+          )}
           <button
             onClick={() => {
               localStorage.removeItem('physiq_license_key');
@@ -402,6 +414,8 @@ function PhysIQApp() {
       <LockScreen
         errorCode={error?.code || 'NO_LICENSE'}
         errorMessage={error?.message || 'Vui lòng nhập license key để tiếp tục.'}
+        revokedAt={error?.revokedAt}
+        revokedReason={error?.revokedReason}
         onRetry={checkLicense}
         onActivate={handleActivate}
         isLoading={isLoading}
