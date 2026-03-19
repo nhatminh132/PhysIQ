@@ -4,8 +4,14 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Shield, Key, HelpCircle, Plus, Trash2, Ban, RotateCcw,
   CheckCircle, XCircle, Clock, ChevronDown, ChevronUp,
-  Copy, BarChart3, RefreshCw, Eye, EyeOff
+  Copy, BarChart3, RefreshCw, Eye, EyeOff, Upload, X
 } from 'lucide-react';
+
+interface Toast {
+  id: string;
+  type: 'success' | 'error' | 'info';
+  message: string;
+}
 
 interface License {
   id: string;
@@ -56,9 +62,23 @@ export default function AdminDashboard() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [quizSets, setQuizSets] = useState<QuizSet[]>([]);
   const [filterQuizSet, setFilterQuizSet] = useState<string | null>(null);
-  const [msg, setMsg] = useState<{ type: string; text: string } | null>(null);
+  const [toasts, setToasts] = useState<Toast[]>([]);
   const [expandId, setExpandId] = useState<string | null>(null);
   const [revokeTarget, setRevokeTarget] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const addToast = useCallback((type: Toast['type'], message: string) => {
+    const id = Date.now().toString();
+    setToasts(prev => [...prev, { id, type, message }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 4000);
+  }, []);
+
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
   const [revokeReason, setRevokeReason] = useState('');
   const [newQ, setNewQ] = useState({ question_text: '', options: ['', '', '', ''], correct_index: 0, difficulty: 'easy' as 'easy' | 'medium' | 'hard', phase: '', quiz_set_id: '' });
   const [editQ, setEditQ] = useState<Question | null>(null);
@@ -66,13 +86,6 @@ export default function AdminDashboard() {
   const [newQS, setNewQS] = useState({ name: '', description: '', subject: '', grade: '' });
   const [editQS, setEditQS] = useState<QuizSet | null>(null);
   const [assignQS, setAssignQS] = useState<{ licenseId: string; quizSetId: string } | null>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  const showMsg = (type: string, text: string) => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    setMsg({ type, text });
-    timerRef.current = setTimeout(() => setMsg(null), 4000);
-  };
 
   const fetchLicenses = useCallback(async (token: string) => {
     const res = await fetch('/api/license/admin', { headers: { Authorization: `Bearer ${token}` } });
@@ -111,16 +124,16 @@ export default function AdminDashboard() {
     const t = sessionStorage.getItem('physiq_admin_pass');
     if (!t) return;
     const r = await fetch('/api/license/admin', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` }, body: JSON.stringify({ id, action: 'revoke', revoked_reason: revokeReason }) });
-    if (r.ok) { showMsg('success', 'Đã khóa!'); fetchLicenses(t); setRevokeTarget(null); setRevokeReason(''); }
-    else showMsg('error', 'Lỗi!');
+    if (r.ok) { addToast('success', 'Đã khóa!'); fetchLicenses(t); setRevokeTarget(null); setRevokeReason(''); }
+    else addToast('error', 'Lỗi!');
   };
 
   const restore = async (id: string) => {
     const t = sessionStorage.getItem('physiq_admin_pass');
     if (!t) return;
     const r = await fetch('/api/license/admin', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` }, body: JSON.stringify({ id, action: 'restore' }) });
-    if (r.ok) { showMsg('success', 'Đã khôi phục!'); fetchLicenses(t); }
-    else showMsg('error', 'Lỗi!');
+    if (r.ok) { addToast('success', 'Đã khôi phục!'); fetchLicenses(t); }
+    else addToast('error', 'Lỗi!');
   };
 
   const createLicense = async (e: React.FormEvent) => {
@@ -129,8 +142,8 @@ export default function AdminDashboard() {
     if (!t) return;
     const fd = new FormData(e.target as HTMLFormElement);
     const r = await fetch('/api/license/admin', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` }, body: JSON.stringify({ owner_name: fd.get('owner_name') || undefined, max_activations: parseInt(fd.get('max_activations') as string, 10) || 1, quiz_set_id: fd.get('quiz_set_id') || undefined }) });
-    if (r.ok) { showMsg('success', `Tạo thành công!`); fetchLicenses(t); setNewL({ owner_name: '', max_activations: 1, quiz_set_id: '' }); }
-    else showMsg('error', 'Lỗi!');
+    if (r.ok) { addToast('success', `Tạo thành công!`); fetchLicenses(t); setNewL({ owner_name: '', max_activations: 1, quiz_set_id: '' }); }
+    else addToast('error', 'Lỗi!');
   };
 
   const createQuestion = async (e: React.FormEvent) => {
@@ -138,8 +151,8 @@ export default function AdminDashboard() {
     const t = sessionStorage.getItem('physiq_admin_pass');
     if (!t) return;
     const r = await fetch('/api/questions', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` }, body: JSON.stringify(newQ) });
-    if (r.ok) { showMsg('success', 'Thêm câu hỏi!'); fetchQuestions(); setNewQ({ question_text: '', options: ['', '', '', ''], correct_index: 0, difficulty: 'easy', phase: '', quiz_set_id: '' }); }
-    else showMsg('error', 'Lỗi!');
+    if (r.ok) { addToast('success', 'Thêm câu hỏi!'); fetchQuestions(); setNewQ({ question_text: '', options: ['', '', '', ''], correct_index: 0, difficulty: 'easy', phase: '', quiz_set_id: '' }); }
+    else addToast('error', 'Lỗi!');
   };
 
   const updateQuestion = async (e: React.FormEvent) => {
@@ -147,8 +160,8 @@ export default function AdminDashboard() {
     const t = sessionStorage.getItem('physiq_admin_pass');
     if (!t) return;
     const r = await fetch('/api/questions', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` }, body: JSON.stringify(editQ) });
-    if (r.ok) { showMsg('success', 'Cập nhật!'); fetchQuestions(); setEditQ(null); }
-    else showMsg('error', 'Lỗi!');
+    if (r.ok) { addToast('success', 'Cập nhật!'); fetchQuestions(); setEditQ(null); }
+    else addToast('error', 'Lỗi!');
   };
 
   const deleteQuestion = async (id: string) => {
@@ -156,8 +169,8 @@ export default function AdminDashboard() {
     const t = sessionStorage.getItem('physiq_admin_pass');
     if (!t) return;
     const r = await fetch(`/api/questions?id=${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${t}` } });
-    if (r.ok) { showMsg('success', 'Xóa!'); fetchQuestions(); }
-    else showMsg('error', 'Lỗi!');
+    if (r.ok) { addToast('success', 'Xóa!'); fetchQuestions(); }
+    else addToast('error', 'Lỗi!');
   };
 
   const createQuizSet = async (e: React.FormEvent) => {
@@ -165,8 +178,8 @@ export default function AdminDashboard() {
     const t = sessionStorage.getItem('physiq_admin_pass');
     if (!t) return;
     const r = await fetch('/api/quiz-sets', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` }, body: JSON.stringify(newQS) });
-    if (r.ok) { showMsg('success', 'Tạo Quiz Set!'); fetchQuizSets(); setNewQS({ name: '', description: '', subject: '', grade: '' }); }
-    else showMsg('error', 'Lỗi!');
+    if (r.ok) { addToast('success', 'Tạo Quiz Set!'); fetchQuizSets(); setNewQS({ name: '', description: '', subject: '', grade: '' }); }
+    else addToast('error', 'Lỗi!');
   };
 
   const updateQuizSet = async (e: React.FormEvent) => {
@@ -175,8 +188,8 @@ export default function AdminDashboard() {
     const t = sessionStorage.getItem('physiq_admin_pass');
     if (!t) return;
     const r = await fetch('/api/quiz-sets', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` }, body: JSON.stringify(editQS) });
-    if (r.ok) { showMsg('success', 'Cập nhật!'); fetchQuizSets(); setEditQS(null); }
-    else showMsg('error', 'Lỗi!');
+    if (r.ok) { addToast('success', 'Cập nhật!'); fetchQuizSets(); setEditQS(null); }
+    else addToast('error', 'Lỗi!');
   };
 
   const deleteQuizSet = async (id: string) => {
@@ -184,16 +197,98 @@ export default function AdminDashboard() {
     const t = sessionStorage.getItem('physiq_admin_pass');
     if (!t) return;
     const r = await fetch(`/api/quiz-sets?id=${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${t}` } });
-    if (r.ok) { showMsg('success', 'Xóa!'); fetchQuizSets(); }
-    else showMsg('error', 'Lỗi!');
+    if (r.ok) { addToast('success', 'Xóa!'); fetchQuizSets(); }
+    else addToast('error', 'Lỗi!');
   };
 
   const assignQuizSetToLicense = async (licenseId: string, quizSetId: string) => {
     const t = sessionStorage.getItem('physiq_admin_pass');
     if (!t) return;
     const r = await fetch('/api/quiz-sets/assign', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` }, body: JSON.stringify({ license_id: licenseId, quiz_set_id: quizSetId || null }) });
-    if (r.ok) { showMsg('success', 'Gán Quiz Set!'); fetchLicenses(t); setAssignQS(null); }
-    else showMsg('error', 'Lỗi!');
+    if (r.ok) { addToast('success', 'Gán Quiz Set!'); fetchLicenses(t); setAssignQS(null); }
+    else addToast('error', 'Lỗi!');
+  };
+
+  const importQuestionsFromJSON = async (questionsData: Array<{
+    question_text: string;
+    options: string[];
+    correct_index: number;
+    difficulty: string;
+    phase?: string;
+    quiz_set_id?: string;
+  }>) => {
+    const t = sessionStorage.getItem('physiq_admin_pass');
+    if (!t) return;
+    
+    let successCount = 0;
+    let errorCount = 0;
+    
+    for (const q of questionsData) {
+      const r = await fetch('/api/questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` },
+        body: JSON.stringify(q)
+      });
+      if (r.ok) successCount++;
+      else errorCount++;
+    }
+    
+    if (successCount > 0) {
+      addToast('success', `Đã thêm ${successCount} câu hỏi!${errorCount > 0 ? ` (${errorCount} lỗi)` : ''}`);
+      fetchQuestions();
+    } else {
+      addToast('error', 'Lỗi khi import!');
+    }
+  };
+
+  const handleFileDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    
+    if (!file.name.endsWith('.json')) {
+      addToast('error', 'Chỉ chấp nhận file JSON!');
+      return;
+    }
+    
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      
+      if (Array.isArray(data)) {
+        importQuestionsFromJSON(data);
+      } else if (data.questions && Array.isArray(data.questions)) {
+        importQuestionsFromJSON(data.questions);
+      } else {
+        addToast('error', 'Format JSON không hợp lệ!');
+      }
+    } catch {
+      addToast('error', 'Không thể đọc file!');
+    }
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      
+      if (Array.isArray(data)) {
+        importQuestionsFromJSON(data);
+      } else if (data.questions && Array.isArray(data.questions)) {
+        importQuestionsFromJSON(data.questions);
+      } else {
+        addToast('error', 'Format JSON không hợp lệ!');
+      }
+    } catch {
+      addToast('error', 'Không thể đọc file!');
+    }
+    
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   if (!isAuth) {
@@ -235,7 +330,26 @@ export default function AdminDashboard() {
           <button onClick={() => setIsAuth(false)} className="text-sm text-muted-foreground hover:text-foreground">Đăng xuất</button>
         </div>
 
-        {msg && <div className={`mb-6 p-4 rounded-lg ${msg.type === 'success' ? 'bg-green-500/10 border border-green-500/30 text-green-500' : 'bg-red-500/10 border border-red-500/30 text-red-500'}`}>{msg.text}</div>}
+        <div className="fixed top-4 right-4 z-50 space-y-2 max-w-sm">
+          {toasts.map((toast) => (
+            <div
+              key={toast.id}
+              className={`p-4 rounded-lg shadow-lg flex items-center gap-3 animate-slide-in ${
+                toast.type === 'success' ? 'bg-green-500 text-white' :
+                toast.type === 'error' ? 'bg-red-500 text-white' :
+                'bg-blue-500 text-white'
+              }`}
+            >
+              {toast.type === 'success' && <CheckCircle size={18} />}
+              {toast.type === 'error' && <XCircle size={18} />}
+              {toast.type === 'info' && <Shield size={18} />}
+              <span className="flex-1">{toast.message}</span>
+              <button onClick={() => removeToast(toast.id)} className="hover:opacity-70">
+                <X size={16} />
+              </button>
+            </div>
+          ))}
+        </div>
 
         <div className="flex gap-1 mb-8 bg-secondary/30 p-1 rounded-lg w-fit">
           {(['licenses', 'questions', 'quizsets', 'analytics'] as Tab[]).map((t) => (
@@ -302,7 +416,7 @@ export default function AdminDashboard() {
                         {l.revoked_reason && <div className="col-span-4"><p className="text-red-500">Lý do: {l.revoked_reason}</p></div>}
                       </div>
                       <div className="flex gap-2">
-                        <button onClick={() => { navigator.clipboard.writeText(l.license_key); showMsg('success', 'Copy!'); }} className="px-3 py-1.5 text-xs border border-border rounded hover:bg-secondary/50"><Copy size={12} className="inline mr-1" />Copy</button>
+                        <button onClick={() => { navigator.clipboard.writeText(l.license_key); addToast('success', 'Copy!'); }} className="px-3 py-1.5 text-xs border border-border rounded hover:bg-secondary/50"><Copy size={12} className="inline mr-1" />Copy</button>
                         <button onClick={() => setAssignQS({ licenseId: l.id, quizSetId: l.quiz_set_id || '' })} className="px-3 py-1.5 text-xs border border-border rounded hover:bg-secondary/50"><BarChart3 size={12} className="inline mr-1" />Quiz Set</button>
                         {l.status === 'active' ? (
                           <button onClick={() => setRevokeTarget(l.id)} className="px-3 py-1.5 text-xs bg-red-500/20 text-red-500 border border-red-500/30 rounded"><Ban size={12} className="inline mr-1" />Khóa</button>
@@ -350,6 +464,37 @@ export default function AdminDashboard() {
               <div className="bg-secondary/30 border border-border rounded-lg p-4"><p className="text-2xl font-bold text-green-500">{questions.filter((q) => q.difficulty === 'easy').length}</p><p className="text-sm text-muted-foreground">Cơ bản</p></div>
               <div className="bg-secondary/30 border border-border rounded-lg p-4"><p className="text-2xl font-bold text-yellow-500">{questions.filter((q) => q.difficulty === 'medium').length}</p><p className="text-sm text-muted-foreground">Trung bình</p></div>
               <div className="bg-secondary/30 border border-border rounded-lg p-4"><p className="text-2xl font-bold text-red-500">{questions.filter((q) => q.difficulty === 'hard').length}</p><p className="text-sm text-muted-foreground">Nâng cao</p></div>
+            </div>
+
+            <div
+              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+              onDragLeave={() => setIsDragging(false)}
+              onDrop={handleFileDrop}
+              className={`p-8 border-2 border-dashed rounded-lg text-center transition-colors ${
+                isDragging ? 'border-blue-500 bg-blue-500/10' : 'border-border hover:border-blue-500/50'
+              }`}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <Upload size={32} className={`mx-auto mb-3 ${isDragging ? 'text-blue-500' : 'text-muted-foreground'}`} />
+              <p className="text-muted-foreground mb-2">
+                {isDragging ? 'Thả file vào đây...' : 'Kéo thả file JSON để import câu hỏi'}
+              </p>
+              <p className="text-xs text-muted-foreground/60 mb-3">hoặc</p>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="px-4 py-2 bg-foreground text-background rounded-lg text-sm font-medium hover:opacity-90"
+              >
+                Chọn file
+              </button>
+              <p className="text-xs text-muted-foreground/40 mt-3">
+                Format: [{`{ "question_text": "...", "options": [...], "correct_index": 0, "difficulty": "easy" }`}]
+              </p>
             </div>
 
             {editQ ? (
