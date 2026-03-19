@@ -95,12 +95,9 @@ export default function AdminDashboard() {
   const fetchQuestions = useCallback(async () => {
     try {
       const res = await fetch('/api/questions?include_inactive=true');
-      if (res.ok) {
-        const data = await res.json();
-        setQuestions(data.questions || []);
-      } else {
-        console.error('Failed to fetch questions:', res.status);
-      }
+      const data = await res.json();
+      console.log('Questions API response:', data);
+      setQuestions(data.questions || []);
     } catch (err) {
       console.error('Fetch questions error:', err);
     }
@@ -184,6 +181,7 @@ export default function AdminDashboard() {
       });
       
       if (r.ok) { 
+        console.log('Question created, response:', await r.clone().json());
         addToast('success', 'Thêm câu hỏi thành công!'); 
         await fetchQuestions(); 
         setNewQ({ question_text: '', options: ['', '', '', ''], correct_index: 0, difficulty: 'easy', phase: '', quiz_set_id: '' }); 
