@@ -93,8 +93,17 @@ export default function AdminDashboard() {
   }, []);
 
   const fetchQuestions = useCallback(async () => {
-    const res = await fetch('/api/questions?include_inactive=true');
-    if (res.ok) setQuestions((await res.json()).questions || []);
+    try {
+      const res = await fetch('/api/questions?include_inactive=true');
+      if (res.ok) {
+        const data = await res.json();
+        setQuestions(data.questions || []);
+      } else {
+        console.error('Failed to fetch questions:', res.status);
+      }
+    } catch (err) {
+      console.error('Fetch questions error:', err);
+    }
   }, []);
 
   const fetchQuizSets = useCallback(async () => {
@@ -150,9 +159,42 @@ export default function AdminDashboard() {
     e.preventDefault();
     const t = sessionStorage.getItem('physiq_admin_pass');
     if (!t) return;
-    const r = await fetch('/api/questions', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` }, body: JSON.stringify(newQ) });
-    if (r.ok) { addToast('success', 'Thêm câu hỏi!'); fetchQuestions(); setNewQ({ question_text: '', options: ['', '', '', ''], correct_index: 0, difficulty: 'easy', phase: '', quiz_set_id: '' }); }
-    else addToast('error', 'Lỗi!');
+    
+    if (!newQ.question_text.trim()) {
+      addToast('error', 'Cần nhập câu hỏi!');
+      return;
+    }
+    
+    const body = {
+      ...newQ,
+      question_text: newQ.question_text.trim(),
+      options: newQ.options.map(opt => opt.trim()).filter(opt => opt)
+    };
+    
+    if (body.options.length !== 4) {
+      addToast('error', 'Cần điền đủ 4 đáp án!');
+      return;
+    }
+    
+    try {
+      const r = await fetch('/api/questions', { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` }, 
+        body: JSON.stringify(body) 
+      });
+      
+      if (r.ok) { 
+        addToast('success', 'Thêm câu hỏi thành công!'); 
+        await fetchQuestions(); 
+        setNewQ({ question_text: '', options: ['', '', '', ''], correct_index: 0, difficulty: 'easy', phase: '', quiz_set_id: '' }); 
+      } else {
+        const err = await r.json().catch(() => ({ error: 'Unknown error' }));
+        addToast('error', `Lỗi: ${err.error || 'Không thể tạo câu hỏi'}`);
+      }
+    } catch (err) {
+      console.error('Create question error:', err);
+      addToast('error', 'Lỗi kết nối!');
+    }
   };
 
   const updateQuestion = async (e: React.FormEvent) => {
