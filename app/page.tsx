@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSound } from '@/hooks/useSound';
 import { useLicense } from '@/hooks/useLicense';
-import { Eye, EyeOff, Volume2, VolumeX, Keyboard } from 'lucide-react';
+import { Eye, EyeOff, Volume2, VolumeX, Keyboard, LogOut } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import LoadingScreen from '@/components/LoadingScreen';
 import LockScreen from '@/components/LockScreen';
@@ -549,12 +549,29 @@ function PhysIQApp() {
             <div className={`px-4 py-2 rounded-full text-white text-sm font-semibold ${getPhaseColor(displayPhase)}`}>
               {displayPhase}
             </div>
-            <button
-              onClick={() => setSoundEnabled(!soundEnabled)}
-              className="p-2 rounded-full bg-secondary/50 hover:bg-secondary transition-colors"
-            >
-              {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  localStorage.removeItem('physiq_license_key');
+                  localStorage.removeItem('physiq_license_info');
+                  localStorage.removeItem('physiq_grace_end');
+                  localStorage.removeItem('physiq_grace_key');
+                  localStorage.removeItem('physiq_revoked_info');
+                  localStorage.removeItem('physiq_instance_id');
+                  window.location.reload();
+                }}
+                className="p-2 rounded-full bg-secondary/50 hover:bg-secondary transition-colors text-red-500"
+                title="Đăng xuất"
+              >
+                <LogOut size={20} />
+              </button>
+              <button
+                onClick={() => setSoundEnabled(!soundEnabled)}
+                className="p-2 rounded-full bg-secondary/50 hover:bg-secondary transition-colors"
+              >
+                {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
+              </button>
+            </div>
           </div>
 
           <div className="mb-8">
