@@ -88,10 +88,21 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseAdmin();
 
-    let quizSetId = quiz_set_id || null;
-    if (quizSetId && typeof quizSetId === 'string') {
-      if (!quizSetId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
-        quizSetId = null;
+    let quizSetId = null;
+    
+    if (quiz_set_id && typeof quiz_set_id === 'string') {
+      const trimmed = quiz_set_id.trim();
+      
+      if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed)) {
+        quizSetId = trimmed;
+      } else {
+        const { data: qs } = await supabase
+          .from('quiz_sets')
+          .select('id')
+          .ilike('name', trimmed)
+          .maybeSingle();
+        
+        if (qs) quizSetId = qs.id;
       }
     }
 

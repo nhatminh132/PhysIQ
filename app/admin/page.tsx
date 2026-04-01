@@ -269,7 +269,7 @@ export default function AdminDashboard() {
           correct_index: q.correct_index,
           difficulty: q.difficulty,
           phase: q.phase || '',
-          quiz_set_id: q.quiz_set_id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(q.quiz_set_id) ? q.quiz_set_id : ''
+          quiz_set_id: q.quiz_set_id || ''
         })
       });
       if (r.ok) successCount++;
