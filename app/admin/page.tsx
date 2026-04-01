@@ -91,15 +91,9 @@ export default function AdminDashboard() {
 
   const fetchQuestions = useCallback(async () => {
     try {
-      const res = await fetch('/api/quiz-questions?include_inactive=true&t=' + Date.now(), {
-        cache: 'no-store'
-      });
+      const res = await fetch('/api/quiz-questions?include_inactive=true&t=' + Date.now());
       const data = await res.json();
-      console.log('Questions API response:', data);
-      const newQuestions = data.questions || [];
-      console.log('Setting questions count:', newQuestions.length);
-      setQuestions([...newQuestions]);
-      console.log('After setQuestions, state should be:', newQuestions.length);
+      setQuestions(data.questions || []);
     } catch (err) {
       console.error('Fetch questions error:', err);
     }
@@ -111,10 +105,6 @@ export default function AdminDashboard() {
     const res = await fetch('/api/quiz-sets', { headers: { Authorization: `Bearer ${t}` } });
     if (res.ok) setQuizSets((await res.json()).quiz_sets || []);
   }, []);
-
-  useEffect(() => {
-    console.log('Questions state updated:', questions.length, questions);
-  }, [questions]);
 
   useEffect(() => {
     if (!isAuth) return;

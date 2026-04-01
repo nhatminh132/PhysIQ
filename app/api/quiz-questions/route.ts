@@ -51,10 +51,11 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query;
 
     if (error) {
+      console.error('Questions fetch error:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ questions: data });
+    return NextResponse.json({ questions: data || [] });
   } catch (err) {
     console.error('Questions fetch error:', err);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
@@ -87,6 +88,8 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseAdmin();
 
+    const quizSetId = quiz_set_id || null;
+
     const { data, error } = await supabase
       .from('questions')
       .insert({
@@ -96,12 +99,13 @@ export async function POST(request: NextRequest) {
         difficulty,
         phase: phase || null,
         explanation: explanation || null,
-        quiz_set_id: quiz_set_id || null,
+        quiz_set_id: quizSetId === '' ? null : quizSetId,
       })
       .select()
       .single();
 
     if (error) {
+      console.error('Insert question error:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
