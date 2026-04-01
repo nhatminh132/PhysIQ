@@ -239,14 +239,12 @@ export default function LockScreen({
                 {isLoading ? 'Đang kiểm tra...' : 'Kết nối lại'}
               </button>
             )}
-            {!isRevoked && (
-              <button
-                onClick={() => setActivateMode(true)}
-                className="w-full py-3 px-4 border border-border rounded-lg hover:bg-secondary/50 transition-colors text-sm"
-              >
-                Nhập License Key
-              </button>
-            )}
+            <button
+              onClick={() => setActivateMode(true)}
+              className="w-full py-3 px-4 border border-border rounded-lg hover:bg-secondary/50 transition-colors text-sm"
+            >
+              Nhập License Key
+            </button>
             <button
               onClick={() => {
                 localStorage.removeItem('physiq_license_key');
