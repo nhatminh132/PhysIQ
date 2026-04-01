@@ -88,7 +88,12 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseAdmin();
 
-    const quizSetId = quiz_set_id || null;
+    let quizSetId = quiz_set_id || null;
+    if (quizSetId && typeof quizSetId === 'string') {
+      if (!quizSetId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
+        quizSetId = null;
+      }
+    }
 
     const { data, error } = await supabase
       .from('questions')
@@ -99,7 +104,7 @@ export async function POST(request: NextRequest) {
         difficulty,
         phase: phase || null,
         explanation: explanation || null,
-        quiz_set_id: quizSetId === '' ? null : quizSetId,
+        quiz_set_id: quizSetId,
       })
       .select()
       .single();
