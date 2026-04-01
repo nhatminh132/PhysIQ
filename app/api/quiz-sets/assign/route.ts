@@ -38,8 +38,7 @@ export async function POST(request: Request) {
         .from('license_quiz_sets')
         .upsert({ 
           license_id, 
-          quiz_set_id,
-          updated_at: new Date().toISOString()
+          quiz_set_id
         }, { onConflict: 'license_id' });
 
       if (error) throw error;
