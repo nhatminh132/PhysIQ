@@ -169,6 +169,14 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
+    const deleteAll = searchParams.get('delete_all') === 'true';
+
+    if (deleteAll) {
+      const supabase = getSupabaseAdmin();
+      const { error } = await supabase.from('questions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      if (error) throw error;
+      return NextResponse.json({ success: true, message: 'Đã xóa tất cả câu hỏi' });
+    }
 
     if (!id) {
       return NextResponse.json({ error: 'Question ID required' }, { status: 400 });

@@ -506,10 +506,26 @@ export default function AdminDashboard() {
 
         {tab === 'questions' && (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="bg-secondary/30 border border-border rounded-lg p-4"><p className="text-2xl font-bold text-green-500">{questions.filter((q) => q.difficulty === 'easy').length}</p><p className="text-sm text-muted-foreground">Cơ bản</p></div>
               <div className="bg-secondary/30 border border-border rounded-lg p-4"><p className="text-2xl font-bold text-yellow-500">{questions.filter((q) => q.difficulty === 'medium').length}</p><p className="text-sm text-muted-foreground">Trung bình</p></div>
               <div className="bg-secondary/30 border border-border rounded-lg p-4"><p className="text-2xl font-bold text-red-500">{questions.filter((q) => q.difficulty === 'hard').length}</p><p className="text-sm text-muted-foreground">Nâng cao</p></div>
+              <button 
+                onClick={async () => { 
+                  if (confirm('Xóa TẤT CẢ câu hỏi?')) { 
+                    const t = sessionStorage.getItem('physiq_admin_pass'); 
+                    if (t) { 
+                      await fetch('/api/quiz-questions?delete_all=true', { method: 'DELETE', headers: { Authorization: `Bearer ${t}` } }); 
+                      addToast('success', 'Đã xóa tất cả!'); 
+                      fetchQuestions(); 
+                    }
+                  }
+                }} 
+                className="bg-red-500/20 border border-red-500/30 text-red-500 rounded-lg p-4 hover:bg-red-500/30 transition-colors"
+              >
+                <p className="text-2xl font-bold text-red-500">Xóa all</p>
+                <p className="text-sm text-red-500/70">Cẩn thận!</p>
+              </button>
             </div>
 
             <div
