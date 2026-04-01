@@ -227,6 +227,39 @@ export default function LockScreen({
               Xóa License &amp; Thử lại
             </button>
           </div>
+        ) : activateMode ? (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Nhập License Key của bạn
+              </label>
+              <input
+                type="text"
+                value={activateKey}
+                onChange={(e) => setActivateKey(e.target.value.toUpperCase())}
+                placeholder="PHY-XXXXXXXXXXXXXXXXXXXXXXXX"
+                className="w-full p-3 border border-border bg-secondary/30 rounded-lg text-center font-mono tracking-wider"
+                autoFocus
+                disabled={isLoading}
+              />
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setActivateMode(false); setActivateKey(''); }}
+                className="flex-1 py-3 px-4 border border-border rounded-lg hover:bg-secondary/50 transition-colors"
+                disabled={isLoading}
+              >
+                Quay lại
+              </button>
+              <button
+                onClick={handleActivate}
+                disabled={!activateKey.trim() || isLoading}
+                className="flex-1 py-3 px-4 bg-foreground text-background font-semibold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {isLoading ? 'Đang xác thực...' : 'Kích hoạt'}
+              </button>
+            </div>
+          </div>
         ) : (
           <div className="space-y-3">
             {isGrace && onRetry && (
@@ -262,9 +295,12 @@ export default function LockScreen({
           </div>
         )}
 
-        <p className="text-center text-xs text-muted-foreground/40 mt-8">
-          PhysIQ License System v1.0
-        </p>
+        <div className="flex justify-between items-center mt-8">
+          <p className="text-center text-xs text-muted-foreground/40">
+            PhysIQ License System v1.0
+          </p>
+          <p className="text-xs text-muted-foreground/40">v42</p>
+        </div>
       </div>
     </div>
   );

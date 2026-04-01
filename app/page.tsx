@@ -709,6 +709,8 @@ function PhysIQApp() {
           >
             Làm lại Quiz
           </button>
+
+          <p className="text-center text-xs text-muted-foreground/40 mt-6">v42</p>
         </div>
       </div>
     );
