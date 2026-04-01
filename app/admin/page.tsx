@@ -273,7 +273,14 @@ export default function AdminDashboard() {
       const r = await fetch('/api/quiz-questions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` },
-        body: JSON.stringify(q)
+        body: JSON.stringify({
+          question_text: q.question_text,
+          options: q.options,
+          correct_index: q.correct_index,
+          difficulty: q.difficulty,
+          phase: q.phase || '',
+          quiz_set_id: q.quiz_set_id || ''
+        })
       });
       if (r.ok) successCount++;
       else errorCount++;
