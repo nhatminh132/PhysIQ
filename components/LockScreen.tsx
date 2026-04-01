@@ -42,6 +42,8 @@ export default function LockScreen({
 }: LockScreenProps) {
   const [activateKey, setActivateKey] = useState('');
   const [activateMode, setActivateMode] = useState(false);
+  const [activating, setActivating] = useState(false);
+  const [activateMsg, setActivateMsg] = useState<{type: 'success' | 'error', text: string} | null>(null);
   const [localRemaining, setLocalRemaining] = useState<number | null>(gracePeriodRemainingMs ?? null);
 
   useEffect(() => {
@@ -63,6 +65,13 @@ export default function LockScreen({
       onActivate(activateKey.trim());
     }
   }, [activateKey, onActivate]);
+
+  const handleActivateWithToast = () => {
+    if (!activateKey.trim()) {
+      return;
+    }
+    onActivate?.(activateKey.trim());
+  };
 
   const isRevoked = errorCode === 'LICENSE_REVOKED';
   const isGrace = isGracePeriod || (localRemaining !== null && localRemaining > 0);
@@ -245,20 +254,34 @@ export default function LockScreen({
             </div>
             <div className="flex gap-3">
               <button
-                onClick={() => { setActivateMode(false); setActivateKey(''); }}
+                onClick={() => { setActivateMode(false); setActivateKey(''); setActivateMsg(null); }}
                 className="flex-1 py-3 px-4 border border-border rounded-lg hover:bg-secondary/50 transition-colors"
-                disabled={isLoading}
+                disabled={activating}
               >
                 Quay lại
               </button>
               <button
-                onClick={handleActivate}
-                disabled={!activateKey.trim() || isLoading}
+                onClick={() => {
+                  if (activateKey.trim() && onActivate) {
+                    setActivating(true);
+                    setActivateMsg({type: 'success', text: 'Đang xác thực license...'});
+                    onActivate(activateKey.trim());
+                  }
+                }}
+                disabled={!activateKey.trim() || activating}
                 className="flex-1 py-3 px-4 bg-foreground text-background font-semibold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
               >
-                {isLoading ? 'Đang xác thực...' : 'Kích hoạt'}
+                {activating ? 'Đang xác thực...' : 'Kích hoạt'}
               </button>
             </div>
+
+            {activateMsg && (
+              <div className={`mt-4 p-3 rounded-lg text-sm text-center ${
+                activateMsg.type === 'success' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
+              }`}>
+                {activateMsg.text}
+              </div>
+            )}
           </div>
         ) : (
           <div className="space-y-3">
