@@ -38,6 +38,7 @@ interface Question {
   phase: string | null;
   is_active: boolean;
   quiz_set_id: string | null;
+  image_url?: string;
 }
 
 interface QuizSet {
@@ -77,7 +78,7 @@ export default function AdminDashboard() {
     setToasts(prev => prev.filter(t => t.id !== id));
   };
   const [revokeReason, setRevokeReason] = useState('');
-  const [newQ, setNewQ] = useState({ question_text: '', options: ['', '', '', ''], correct_index: 0, difficulty: 'easy' as 'easy' | 'medium' | 'hard', phase: '', quiz_set_id: '' });
+  const [newQ, setNewQ] = useState({ question_text: '', options: ['', '', '', ''], correct_index: 0, difficulty: 'easy' as 'easy' | 'medium' | 'hard', phase: '', quiz_set_id: '', image_url: '' });
   const [editQ, setEditQ] = useState<Question | null>(null);
   const [newL, setNewL] = useState({ owner_name: '', max_activations: 1, quiz_set_id: '' });
   const [newQS, setNewQS] = useState({ name: '' });
@@ -180,7 +181,7 @@ export default function AdminDashboard() {
         console.log('Question created, response:', await r.clone().json());
         addToast('success', 'Thêm câu hỏi thành công!'); 
         await fetchQuestions(); 
-        setNewQ({ question_text: '', options: ['', '', '', ''], correct_index: 0, difficulty: 'easy', phase: '', quiz_set_id: '' }); 
+        setNewQ({ question_text: '', options: ['', '', '', ''], correct_index: 0, difficulty: 'easy', phase: '', quiz_set_id: '', image_url: '' }); 
       } else {
         const err = await r.json().catch(() => ({ error: 'Unknown error' }));
         addToast('error', `Lỗi: ${err.error || 'Không thể tạo câu hỏi'}`);
@@ -252,6 +253,7 @@ export default function AdminDashboard() {
     difficulty: string;
     phase?: string;
     quiz_set_id?: string;
+    image_url?: string;
   }>) => {
     const t = sessionStorage.getItem('physiq_admin_pass');
     if (!t) return;
@@ -269,7 +271,8 @@ export default function AdminDashboard() {
           correct_index: q.correct_index,
           difficulty: q.difficulty,
           phase: q.phase || '',
-          quiz_set_id: q.quiz_set_id || ''
+          quiz_set_id: q.quiz_set_id || '',
+          image_url: q.image_url || ''
         })
       });
       if (r.ok) successCount++;
@@ -552,7 +555,7 @@ export default function AdminDashboard() {
                 Chọn file
               </button>
               <p className="text-xs text-muted-foreground/40 mt-3">
-                Format: [{`{ "question_text": "...", "options": [...], "correct_index": 0, "difficulty": "easy" }`}]
+                Format: [{`{ "question_text": "...", "options": [...], "correct_index": 0, "difficulty": "easy", "image_url": "https://..." }`}]
               </p>
             </div>
 
@@ -560,6 +563,7 @@ export default function AdminDashboard() {
               <div className="bg-secondary/30 border border-border rounded-lg p-6">
                 <h2 className="text-lg font-semibold mb-4">Sửa câu hỏi</h2>
                 <form onSubmit={updateQuestion} className="space-y-4">
+                  <input value={editQ.image_url || ''} onChange={(e) => setEditQ({ ...editQ, image_url: e.target.value })} placeholder="URL hình ảnh (tùy chọn)" className="w-full p-3 border border-border rounded bg-background" />
                   <textarea value={editQ.question_text} onChange={(e) => setEditQ({ ...editQ, question_text: e.target.value })} className="w-full p-3 border border-border rounded bg-background h-20" />
                   <div className="grid grid-cols-2 gap-3">
                     {editQ.options.map((opt, i) => (
@@ -594,6 +598,7 @@ export default function AdminDashboard() {
               <div className="bg-secondary/30 border border-border rounded-lg p-6">
                 <h2 className="text-lg font-semibold mb-4"><Plus size={18} className="inline mr-2" />Thêm câu hỏi</h2>
                 <form onSubmit={createQuestion} className="space-y-4">
+                  <input value={newQ.image_url} onChange={(e) => setNewQ({ ...newQ, image_url: e.target.value })} placeholder="URL hình ảnh (tùy chọn)" className="w-full p-3 border border-border rounded bg-background" />
                   <textarea value={newQ.question_text} onChange={(e) => setNewQ({ ...newQ, question_text: e.target.value })} placeholder="Câu hỏi" className="w-full p-3 border border-border rounded bg-background h-20" required />
                   <div className="grid grid-cols-2 gap-3">
                     {newQ.options.map((opt, i) => (

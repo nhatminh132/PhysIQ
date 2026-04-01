@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('questions')
-      .select('id, question_text, options, correct_index, difficulty, phase, explanation, quiz_set_id')
+      .select('id, question_text, options, correct_index, difficulty, phase, explanation, quiz_set_id, image_url')
       .order('created_at', { ascending: false })
       .limit(limit);
 
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { question_text, options, correct_index, difficulty, phase, explanation, quiz_set_id } = body;
+    const { question_text, options, correct_index, difficulty, phase, explanation, quiz_set_id, image_url } = body;
 
     if (!question_text || !options || correct_index === undefined || !difficulty) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -116,6 +116,7 @@ export async function POST(request: NextRequest) {
         phase: phase || null,
         explanation: explanation || null,
         quiz_set_id: quizSetId,
+        image_url: image_url || null,
       })
       .select()
       .single();
@@ -142,7 +143,7 @@ export async function PUT(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { id, question_text, options, correct_index, difficulty, phase, explanation, is_active, quiz_set_id } = body;
+    const { id, question_text, options, correct_index, difficulty, phase, explanation, is_active, quiz_set_id, image_url } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'Question ID required' }, { status: 400 });
@@ -159,6 +160,7 @@ export async function PUT(request: NextRequest) {
     if (explanation !== undefined) updateData.explanation = explanation;
     if (is_active !== undefined) updateData.is_active = is_active;
     if (quiz_set_id !== undefined) updateData.quiz_set_id = quiz_set_id || null;
+    if (image_url !== undefined) updateData.image_url = image_url || null;
 
     const { data, error } = await supabase
       .from('questions')

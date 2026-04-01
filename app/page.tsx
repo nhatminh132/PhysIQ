@@ -20,13 +20,14 @@ const shuffleArray = <T,>(array: T[]): T[] => {
 };
 
 interface QuizQuestion {
-  id: string;
+  id?: string;
   question_text: string;
   options: string[];
   correct_index: number;
-  difficulty: string;
-  phase: string | null;
-  explanation?: string | null;
+  difficulty?: string;
+  phase?: string;
+  quiz_set_id?: string;
+  image_url?: string;
 }
 
 const LOCAL_QUESTIONS: QuizQuestion[] = [
@@ -589,6 +590,11 @@ function PhysIQApp() {
 
           <div className="mb-8">
             <h2 className="text-2xl font-bold leading-tight">{question.question_text}</h2>
+            {question.image_url && (
+              <div className="mt-4 flex justify-center">
+                <img src={question.image_url} alt="Hình ảnh" className="max-w-full h-auto rounded-lg border border-border" />
+              </div>
+            )}
           </div>
 
           <div className="space-y-3 mb-8">
@@ -689,6 +695,9 @@ function PhysIQApp() {
                 {wrongAnswers.map((item) => (
                   <div key={item.index} className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
                     <p className="font-medium mb-2">{item.question.question_text}</p>
+                    {item.question.image_url && (
+                      <img src={item.question.image_url} alt="Hình ảnh" className="max-w-full h-auto rounded-lg border border-border mb-2" />
+                    )}
                     <div className="text-sm space-y-1">
                       <p className="text-red-400">
                         ✗ Đã chọn: {item.question.options[item.answer]}
@@ -710,7 +719,7 @@ function PhysIQApp() {
             Làm lại Quiz
           </button>
 
-          <p className="text-center text-xs text-muted-foreground/40 mt-6">v42</p>
+          <p className="text-center text-xs text-muted-foreground/40 mt-6">v43</p>
         </div>
       </div>
     );
