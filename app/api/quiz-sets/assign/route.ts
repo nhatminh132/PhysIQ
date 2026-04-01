@@ -18,13 +18,20 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { license_id, quiz_set_id } = body;
+    let { license_id, quiz_set_id } = body;
 
     if (!license_id) {
       return Response.json({ error: 'License ID is required' }, { status: 400 });
     }
 
     const supabase = getSupabase();
+
+    if (quiz_set_id && typeof quiz_set_id === 'string') {
+      quiz_set_id = quiz_set_id.trim();
+      if (quiz_set_id === '') quiz_set_id = null;
+    } else {
+      quiz_set_id = null;
+    }
 
     if (quiz_set_id) {
       const { error } = await supabase
@@ -33,7 +40,7 @@ export async function POST(request: Request) {
           license_id, 
           quiz_set_id,
           updated_at: new Date().toISOString()
-        });
+        }, { onConflict: 'license_id' });
 
       if (error) throw error;
     } else {
