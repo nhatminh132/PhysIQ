@@ -516,7 +516,7 @@ function PhysIQApp() {
       >
         <div className="w-full max-w-lg">
           <div className="text-center mb-12">
-            <div className="inline-block px-4 py-2 rounded-lg bg-black/60 backdrop-blur-sm mb-4">
+            <div className="inline-block px-4 py-2 rounded-lg bg-black/40 backdrop-blur-sm mb-4">
               <h1 className="text-4xl font-bold text-white mb-2">PhysIQ</h1>
             </div>
             <p className="text-lg text-white/90 bg-black/40 px-3 py-1 rounded inline-block">Kiểm tra kiến thức Vật lý của bạn</p>
@@ -630,7 +630,7 @@ function PhysIQApp() {
           </div>
 
           <div className="mb-8">
-            <div className="p-4 rounded-lg bg-black/60 backdrop-blur-sm">
+            <div className="p-4 rounded-lg bg-black/30 backdrop-blur-sm">
               <h2 className="text-2xl font-bold leading-tight text-white">{question.question_text}</h2>
             </div>
             {question.image_url && (
@@ -646,13 +646,13 @@ function PhysIQApp() {
                 key={index}
                 onClick={() => handleAnswer(index)}
                 className="w-full p-5 text-left border border-border bg-secondary/30 hover:bg-secondary/60 rounded-lg transition-colors duration-200 font-medium flex items-center gap-4"
-                style={buttonColor ? { borderColor: buttonColor, '--tw-border-color': buttonColor } as React.CSSProperties : {}}
+                style={buttonColor ? { borderColor: `${buttonColor}80`, '--tw-border-color': `${buttonColor}80` } as React.CSSProperties : {}}
               >
                 <kbd 
                   className="flex items-center justify-center w-8 h-8 rounded font-mono text-sm"
                   style={{ 
-                    backgroundColor: buttonColor ? `${buttonColor}20` : undefined,
-                    borderColor: buttonColor ? buttonColor : undefined,
+                    backgroundColor: buttonColor ? `${buttonColor}15` : undefined,
+                    borderColor: buttonColor ? `${buttonColor}60` : undefined,
                     borderWidth: buttonColor ? '1px' : undefined,
                     borderStyle: buttonColor ? 'solid' : undefined,
                   }}
@@ -780,7 +780,7 @@ function PhysIQApp() {
             Làm lại Quiz
           </button>
 
-          <p className="text-center text-xs text-muted-foreground/40 mt-6">v45</p>
+          <p className="text-center text-xs text-muted-foreground/40 mt-6">v47</p>
         </div>
       </div>
     );
