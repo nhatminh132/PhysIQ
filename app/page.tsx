@@ -244,7 +244,7 @@ function PhysIQApp() {
       setTimeout(() => {
         if (currentQuestion + 1 < shuffledQuestions.length) {
           setCurrentQuestion(currentQuestion + 1);
-          if (customBackgrounds.length > 0 && (currentQuestion + 1) % 3 === 0) {
+          if (customBackgrounds.length > 0) {
             setCurrentBackgroundIndex((currentBackgroundIndex + 1) % customBackgrounds.length);
           }
         } else {
@@ -646,15 +646,15 @@ function PhysIQApp() {
                 key={index}
                 onClick={() => handleAnswer(index)}
                 className="w-full p-5 text-left border border-border bg-secondary/30 hover:bg-secondary/60 rounded-lg transition-colors duration-200 font-medium flex items-center gap-4"
-                style={buttonColor ? { borderColor: `${buttonColor}80`, '--tw-border-color': `${buttonColor}80` } as React.CSSProperties : {}}
+                style={buttonColor ? { borderColor: buttonColor, '--tw-border-color': buttonColor } as React.CSSProperties : {}}
               >
                 <kbd 
                   className="flex items-center justify-center w-8 h-8 rounded font-mono text-sm"
                   style={{ 
-                    backgroundColor: buttonColor ? `${buttonColor}15` : undefined,
-                    borderColor: buttonColor ? `${buttonColor}60` : undefined,
-                    borderWidth: buttonColor ? '1px' : undefined,
-                    borderStyle: buttonColor ? 'solid' : undefined,
+                    backgroundColor: buttonColor ? `${buttonColor}40` : undefined,
+                    borderColor: buttonColor || undefined,
+                    borderWidth: '1px',
+                    borderStyle: 'solid',
                   }}
                 >
                   <Keyboard size={14} className="mr-1" />
@@ -780,7 +780,7 @@ function PhysIQApp() {
             Làm lại Quiz
           </button>
 
-          <p className="text-center text-xs text-muted-foreground/40 mt-6">v48</p>
+          <p className="text-center text-xs text-muted-foreground/40 mt-6">v47</p>
         </div>
       </div>
     );

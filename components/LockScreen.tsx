@@ -322,7 +322,7 @@ export default function LockScreen({
           <p className="text-center text-xs text-muted-foreground/40">
             PhysIQ License System v1.0
           </p>
-          <p className="text-xs text-muted-foreground/40">v48</p>
+          <p className="text-xs text-muted-foreground/40">v47</p>
         </div>
       </div>
     </div>
