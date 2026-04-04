@@ -166,7 +166,7 @@ function PhysIQApp() {
   const [questionsLoading, setQuestionsLoading] = useState(false);
   const [quizStartTime, setQuizStartTime] = useState<number>(0);
   const [showSettings, setShowSettings] = useState(false);
-  const [textOpacity, setTextOpacity] = useState(90);
+  const [textOpacity, setTextOpacity] = useState(40);
   const [buttonOpacity, setButtonOpacity] = useState(40);
 
   const soundHook = useSound();
