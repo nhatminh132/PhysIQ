@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSound } from '@/hooks/useSound';
 import { useLicense } from '@/hooks/useLicense';
-import { Eye, EyeOff, Volume2, VolumeX, Keyboard, LogOut } from 'lucide-react';
+import { Eye, EyeOff, Volume2, VolumeX, Keyboard, LogOut, Settings } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import LoadingScreen from '@/components/LoadingScreen';
 import LockScreen from '@/components/LockScreen';
@@ -165,6 +165,9 @@ function PhysIQApp() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [questionsLoading, setQuestionsLoading] = useState(false);
   const [quizStartTime, setQuizStartTime] = useState<number>(0);
+  const [showSettings, setShowSettings] = useState(false);
+  const [textOpacity, setTextOpacity] = useState(90);
+  const [buttonOpacity, setButtonOpacity] = useState(40);
 
   const soundHook = useSound();
   const playCorrect = useCallback(() => {
@@ -575,6 +578,8 @@ function PhysIQApp() {
     const displayPhase = question.phase || (question.difficulty === 'easy' ? 'Cơ bản' : question.difficulty === 'medium' ? 'Trung bình' : 'Nâng cao');
 
     const bgImage = customBackgrounds.length > 0 ? customBackgrounds[currentBackgroundIndex] : '';
+    const textBgOpacity = textOpacity / 100;
+    const buttonBgOpacity = buttonOpacity / 100;
     
     return (
       <div 
@@ -592,6 +597,12 @@ function PhysIQApp() {
               {displayPhase}
             </div>
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowSettings(!showSettings)}
+                className={`p-2 rounded-full transition-colors ${showSettings ? 'bg-primary text-primary-foreground' : 'bg-secondary/50 hover:bg-secondary'}`}
+              >
+                <Settings size={20} />
+              </button>
               <button
                 onClick={() => {
                   localStorage.removeItem('physiq_license_key');
@@ -616,6 +627,39 @@ function PhysIQApp() {
             </div>
           </div>
 
+          {showSettings && (
+            <div className="mb-4 p-4 bg-secondary/80 border border-border rounded-lg">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium block mb-2">
+                    Độ mờ nền text: {textOpacity}%
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={textOpacity}
+                    onChange={(e) => setTextOpacity(Number(e.target.value))}
+                    className="w-full h-2 bg-background rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium block mb-2">
+                    Độ mờ nền button: {buttonOpacity}%
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={buttonOpacity}
+                    onChange={(e) => setButtonOpacity(Number(e.target.value))}
+                    className="w-full h-2 bg-background rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
             <div className="mb-8">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-white/90 bg-black/40 px-2 py-1 rounded">Câu {currentQuestion + 1} / {shuffledQuestions.length}</span>
@@ -630,7 +674,10 @@ function PhysIQApp() {
           </div>
 
           <div className="mb-8">
-            <div className="p-4 rounded-lg bg-black/30 backdrop-blur-sm">
+            <div 
+              className="p-4 rounded-lg"
+              style={{ backgroundColor: `rgba(0, 0, 0, ${textBgOpacity})` }}
+            >
               <h2 className="text-2xl font-bold leading-tight text-white">{question.question_text}</h2>
             </div>
             {question.image_url && (
@@ -651,7 +698,7 @@ function PhysIQApp() {
                 <kbd 
                   className="flex items-center justify-center w-8 h-8 rounded font-mono text-sm"
                   style={{ 
-                    backgroundColor: buttonColor ? `${buttonColor}40` : undefined,
+                    backgroundColor: buttonColor ? `${buttonColor}${Math.round(buttonBgOpacity * 255).toString(16).padStart(2, '0')}` : undefined,
                     borderColor: buttonColor || undefined,
                     borderWidth: '1px',
                     borderStyle: 'solid',
@@ -780,7 +827,7 @@ function PhysIQApp() {
             Làm lại Quiz
           </button>
 
-          <p className="text-center text-xs text-muted-foreground/40 mt-6">v47</p>
+          <p className="text-center text-xs text-muted-foreground/40 mt-6">v48</p>
         </div>
       </div>
     );
