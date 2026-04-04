@@ -229,6 +229,7 @@ export async function POST(request: NextRequest) {
       expires_at: license.expires_at,
       metadata: license.metadata,
       quiz_set_id: quizSetId,
+      custom_config: license.custom_config,
     });
   } catch (err) {
     console.error('Checkin error:', err);

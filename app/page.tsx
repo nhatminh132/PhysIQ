@@ -159,6 +159,9 @@ function PhysIQApp() {
   const [feedback, setFeedback] = useState<FeedbackType>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [shuffledQuestions, setShuffledQuestions] = useState<QuizQuestion[]>(LOCAL_QUESTIONS);
+  const [customBackgrounds, setCustomBackgrounds] = useState<string[]>([]);
+  const [currentBackgroundIndex, setCurrentBackgroundIndex] = useState(0);
+  const [buttonColor, setButtonColor] = useState('');
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [questionsLoading, setQuestionsLoading] = useState(false);
   const [quizStartTime, setQuizStartTime] = useState<number>(0);
@@ -241,6 +244,9 @@ function PhysIQApp() {
       setTimeout(() => {
         if (currentQuestion + 1 < shuffledQuestions.length) {
           setCurrentQuestion(currentQuestion + 1);
+          if (customBackgrounds.length > 0) {
+            setCurrentBackgroundIndex((currentBackgroundIndex + 1) % customBackgrounds.length);
+          }
         } else {
           setScreen('result');
           setShowConfetti(true);
@@ -312,6 +318,17 @@ function PhysIQApp() {
     setCurrentQuestion(0);
     setAnswers([]);
     setQuizStartTime(Date.now());
+    
+    if (licenseInfo?.customConfig?.backgrounds && licenseInfo.customConfig.backgrounds.length > 0) {
+      const shuffledBgs = [...licenseInfo.customConfig.backgrounds].sort(() => Math.random() - 0.5);
+      setCustomBackgrounds(shuffledBgs);
+      setCurrentBackgroundIndex(0);
+    }
+    
+    if (licenseInfo?.customConfig?.button_color) {
+      setButtonColor(licenseInfo.customConfig.button_color);
+    }
+    
     setScreen('quiz');
   };
 
@@ -485,8 +502,18 @@ function PhysIQApp() {
   }
 
   if (screen === 'start') {
+    const startBgImage = customBackgrounds.length > 0 ? customBackgrounds[0] : '';
+    
     return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
+      <div 
+        className="min-h-screen text-foreground flex items-center justify-center p-4"
+        style={startBgImage ? { 
+          backgroundImage: `url(${startBgImage})`, 
+          backgroundSize: 'cover', 
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        } : {}}
+      >
         <div className="w-full max-w-lg">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold mb-2">PhysIQ</h1>
@@ -522,7 +549,8 @@ function PhysIQApp() {
 
           <button
             onClick={startQuiz}
-            className="w-full py-4 px-6 bg-foreground text-background font-semibold rounded-lg hover:opacity-90 transition-opacity duration-200"
+            className="w-full py-4 px-6 font-semibold rounded-lg hover:opacity-90 transition-opacity duration-200"
+            style={buttonColor ? { backgroundColor: buttonColor, color: '#fff' } : {}}
           >
             Bắt đầu Quiz
           </button>
@@ -543,8 +571,18 @@ function PhysIQApp() {
 
     const displayPhase = question.phase || (question.difficulty === 'easy' ? 'Cơ bản' : question.difficulty === 'medium' ? 'Trung bình' : 'Nâng cao');
 
+    const bgImage = customBackgrounds.length > 0 ? customBackgrounds[currentBackgroundIndex] : '';
+    
     return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
+      <div 
+        className="min-h-screen text-foreground flex items-center justify-center p-4"
+        style={bgImage ? { 
+          backgroundImage: `url(${bgImage})`, 
+          backgroundSize: 'cover', 
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        } : {}}
+      >
         <div className="w-full max-w-lg">
           <div className="mb-6 flex items-center justify-between">
             <div className={`px-4 py-2 rounded-full text-white text-sm font-semibold ${getPhaseColor(displayPhase)}`}>
@@ -603,8 +641,17 @@ function PhysIQApp() {
                 key={index}
                 onClick={() => handleAnswer(index)}
                 className="w-full p-5 text-left border border-border bg-secondary/30 hover:bg-secondary/60 rounded-lg transition-colors duration-200 font-medium flex items-center gap-4"
+                style={buttonColor ? { borderColor: buttonColor, '--tw-border-color': buttonColor } as React.CSSProperties : {}}
               >
-                <kbd className="flex items-center justify-center w-8 h-8 rounded bg-foreground/10 border border-border font-mono text-sm">
+                <kbd 
+                  className="flex items-center justify-center w-8 h-8 rounded font-mono text-sm"
+                  style={{ 
+                    backgroundColor: buttonColor ? `${buttonColor}20` : undefined,
+                    borderColor: buttonColor ? buttonColor : undefined,
+                    borderWidth: buttonColor ? '1px' : undefined,
+                    borderStyle: buttonColor ? 'solid' : undefined,
+                  }}
+                >
                   <Keyboard size={14} className="mr-1" />
                   {index + 1}
                 </kbd>
@@ -634,9 +681,18 @@ function PhysIQApp() {
     const { easyScore, mediumScore, hardScore } = getPhaseScores();
     const rating = getPerformanceRating(score);
     const wrongAnswers = getWrongAnswers();
+    const resultBgImage = customBackgrounds.length > 0 ? customBackgrounds[customBackgrounds.length - 1] : '';
 
     return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
+      <div 
+        className="min-h-screen text-foreground flex items-center justify-center p-4"
+        style={resultBgImage ? { 
+          backgroundImage: `url(${resultBgImage})`, 
+          backgroundSize: 'cover', 
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        } : {}}
+      >
         {showConfetti && <Confetti />}
         <div className="w-full max-w-lg">
           <div className="text-center mb-12">

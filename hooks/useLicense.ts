@@ -10,6 +10,10 @@ export interface LicenseInfo {
   expiresAt?: string;
   metadata?: Record<string, unknown>;
   quizSetId?: string;
+  customConfig?: {
+    backgrounds?: string[];
+    button_color?: string;
+  };
 }
 
 export interface LicenseError {
@@ -166,6 +170,7 @@ export function useLicense(licenseKey: string | null): UseLicenseReturn {
           expiresAt: data.expires_at,
           metadata: data.metadata,
           quizSetId: data.quiz_set_id,
+          customConfig: data.custom_config,
         }));
 
         setLicenseInfo({
@@ -174,6 +179,7 @@ export function useLicense(licenseKey: string | null): UseLicenseReturn {
           expiresAt: data.expires_at,
           metadata: data.metadata,
           quizSetId: data.quiz_set_id,
+          customConfig: data.custom_config,
         });
         setStatus('valid');
         console.log('License status set to valid');
