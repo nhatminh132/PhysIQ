@@ -516,7 +516,10 @@ function PhysIQApp() {
       >
         <div className="w-full max-w-lg">
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold mb-2">PhysIQ</h1>
+            <div className="inline-block px-4 py-2 rounded-lg bg-black/60 backdrop-blur-sm mb-4">
+              <h1 className="text-4xl font-bold text-white mb-2">PhysIQ</h1>
+            </div>
+            <p className="text-lg text-white/90 bg-black/40 px-3 py-1 rounded inline-block">Kiểm tra kiến thức Vật lý của bạn</p>
             <p className="text-muted-foreground text-lg">Kiểm tra kiến thức Vật lý của bạn</p>
             {isInGracePeriod && (
               <p className="text-yellow-500/60 text-xs mt-2">Grace Period đang hoạt động</p>
@@ -613,21 +616,23 @@ function PhysIQApp() {
             </div>
           </div>
 
-          <div className="mb-8">
+            <div className="mb-8">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm text-muted-foreground">Câu {currentQuestion + 1} / {shuffledQuestions.length}</span>
-              <span className="text-sm text-muted-foreground">{Math.round(progress)}%</span>
+              <span className="text-sm text-white/90 bg-black/40 px-2 py-1 rounded">Câu {currentQuestion + 1} / {shuffledQuestions.length}</span>
+              <span className="text-sm text-white/90 bg-black/40 px-2 py-1 rounded">{Math.round(progress)}%</span>
             </div>
-            <div className="h-1 bg-secondary rounded-full overflow-hidden">
+            <div className="h-1 bg-black/40 rounded-full overflow-hidden">
               <div
-                className="h-full bg-foreground transition-all duration-300"
-                style={{ width: `${progress}%` }}
+                className="h-full transition-all duration-300"
+                style={{ width: `${progress}%`, backgroundColor: buttonColor || 'var(--foreground)' }}
               />
             </div>
           </div>
 
           <div className="mb-8">
-            <h2 className="text-2xl font-bold leading-tight">{question.question_text}</h2>
+            <div className="p-4 rounded-lg bg-black/60 backdrop-blur-sm">
+              <h2 className="text-2xl font-bold leading-tight text-white">{question.question_text}</h2>
+            </div>
             {question.image_url && (
               <div className="mt-4 flex justify-center">
                 <img src={question.image_url} alt="Hình ảnh" className="max-w-full h-auto rounded-lg border border-border" />
@@ -775,7 +780,7 @@ function PhysIQApp() {
             Làm lại Quiz
           </button>
 
-          <p className="text-center text-xs text-muted-foreground/40 mt-6">v43</p>
+          <p className="text-center text-xs text-muted-foreground/40 mt-6">v45</p>
         </div>
       </div>
     );
