@@ -244,7 +244,7 @@ function PhysIQApp() {
       setTimeout(() => {
         if (currentQuestion + 1 < shuffledQuestions.length) {
           setCurrentQuestion(currentQuestion + 1);
-          if (customBackgrounds.length > 0) {
+          if (customBackgrounds.length > 0 && (currentQuestion + 1) % 3 === 0) {
             setCurrentBackgroundIndex((currentBackgroundIndex + 1) % customBackgrounds.length);
           }
         } else {
@@ -780,7 +780,7 @@ function PhysIQApp() {
             Làm lại Quiz
           </button>
 
-          <p className="text-center text-xs text-muted-foreground/40 mt-6">v47</p>
+          <p className="text-center text-xs text-muted-foreground/40 mt-6">v48</p>
         </div>
       </div>
     );
