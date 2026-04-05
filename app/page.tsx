@@ -553,13 +553,14 @@ function PhysIQApp() {
             </div>
           </div>
 
-          <button
+            <button
             onClick={startQuiz}
             className="w-full py-4 px-6 font-semibold rounded-lg hover:opacity-90 transition-opacity duration-200"
             style={buttonColor ? { backgroundColor: buttonColor, color: '#fff' } : {}}
           >
             Bắt đầu Quiz
           </button>
+          <p className="text-center text-xs text-muted-foreground/40 mt-6">v48</p>
         </div>
       </div>
     );
@@ -701,7 +702,7 @@ function PhysIQApp() {
                 }}
               >
                 <kbd 
-                  className="flex items-center justify-center w-8 h-8 rounded font-mono text-sm text-white"
+                  className="flex items-center justify-center w-8 h-8 rounded font-mono text-sm"
                   style={{ 
                     backgroundColor: buttonColor ? `${buttonColor}` : undefined,
                     borderColor: buttonColor || undefined,

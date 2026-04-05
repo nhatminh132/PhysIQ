@@ -7,7 +7,7 @@ interface LoadingScreenProps {
   onComplete: () => void;
 }
 
-const WORDS = ['PhysIQ', 'Vật Lý 10', 'Dễ lắm =)))'];
+const WORDS = ['PhysIQ', 'Vật Lý 10', 'Mixi'];
 
 export default function LoadingScreen({ onComplete }: LoadingScreenProps) {
   const [wordIndex, setWordIndex] = useState(0);
