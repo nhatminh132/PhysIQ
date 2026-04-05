@@ -696,15 +696,14 @@ function PhysIQApp() {
                 style={buttonColor ? { 
                   borderColor: buttonColor, 
                   backgroundColor: `rgba(30, 30, 30, ${buttonBgOpacity})`,
-                  '--tw-border-color': buttonColor 
-                } as React.CSSProperties : {
+                } : {
                   backgroundColor: `rgba(30, 30, 30, ${buttonBgOpacity})`,
                 }}
               >
                 <kbd 
                   className="flex items-center justify-center w-8 h-8 rounded font-mono text-sm text-white"
                   style={{ 
-                    backgroundColor: buttonColor ? `${buttonColor}${Math.round(buttonBgOpacity * 255).toString(16).padStart(2, '0')}` : undefined,
+                    backgroundColor: buttonColor ? `${buttonColor}` : undefined,
                     borderColor: buttonColor || undefined,
                     borderWidth: '1px',
                     borderStyle: 'solid',
