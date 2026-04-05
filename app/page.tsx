@@ -679,7 +679,7 @@ function PhysIQApp() {
             <div className="mb-8">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-white/90 bg-black/40 px-2 py-1 rounded">Câu {currentQuestion + 1} / {shuffledQuestions.length}</span>
-              <span className="text-sm text-white/90 bg-black/40 px-2 py-1 rounded">{Math.round(progress)}%</span>
+              <span className="text-sm text-white/90 px-2 py-1 rounded">{Math.round(progress)}%</span>
             </div>
             <div className="h-1 bg-black/40 rounded-full overflow-hidden">
               <div
@@ -855,7 +855,7 @@ function PhysIQApp() {
 
   return (
     <>
-      {screen === 'result' && <Confetti />}
+      {(screen as string) === 'result' && <Confetti />}
     </>
   );
 }
