@@ -70,7 +70,7 @@ const Confetti = () => {
   const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8'];
 
   useEffect(() => {
-    const confettiCount = 150;
+    const confettiCount = 200;
     const confettiElements: { el: HTMLDivElement; x: number; y: number; vx: number; vy: number; rotation: number; rotationSpeed: number }[] = [];
 
     for (let i = 0; i < confettiCount; i++) {
@@ -82,7 +82,7 @@ const Confetti = () => {
       el.style.height = `${Math.random() * 10 + 5}px`;
       el.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
       el.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-      el.style.zIndex = '100';
+      el.style.zIndex = '9999';
       el.style.pointerEvents = 'none';
       document.body.appendChild(el);
 
