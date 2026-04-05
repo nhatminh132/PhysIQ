@@ -73,29 +73,33 @@ const Confetti = () => {
     const confettiCount = 200;
     const confettiElements: { el: HTMLDivElement; x: number; y: number; vx: number; vy: number; rotation: number; rotationSpeed: number }[] = [];
 
-    for (let i = 0; i < confettiCount; i++) {
-      const el = document.createElement('div');
-      el.style.position = 'fixed';
-      el.style.left = '0';
-      el.style.top = '-10px';
-      el.style.width = `${Math.random() * 10 + 5}px`;
-      el.style.height = `${Math.random() * 10 + 5}px`;
-      el.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-      el.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-      el.style.zIndex = '9999';
-      el.style.pointerEvents = 'none';
-      document.body.appendChild(el);
+    const createConfetti = () => {
+      for (let i = 0; i < confettiCount; i++) {
+        const el = document.createElement('div');
+        el.style.position = 'fixed';
+        el.style.left = '0';
+        el.style.top = '-10px';
+        el.style.width = `${Math.random() * 10 + 5}px`;
+        el.style.height = `${Math.random() * 10 + 5}px`;
+        el.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        el.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+        el.style.zIndex = '9999';
+        el.style.pointerEvents = 'none';
+        document.body.appendChild(el);
 
-      confettiElements.push({
-        el,
-        x: Math.random() * window.innerWidth,
-        y: -20,
-        vx: (Math.random() - 0.5) * 4,
-        vy: Math.random() * 3 + 2,
-        rotation: Math.random() * 360,
-        rotationSpeed: (Math.random() - 0.5) * 10,
-      });
-    }
+        confettiElements.push({
+          el,
+          x: Math.random() * window.innerWidth,
+          y: -20,
+          vx: (Math.random() - 0.5) * 4,
+          vy: Math.random() * 3 + 2,
+          rotation: Math.random() * 360,
+          rotationSpeed: (Math.random() - 0.5) * 10,
+        });
+      }
+    };
+
+    const timeout = setTimeout(createConfetti, 50);
 
     let frame: number;
     const animate = () => {
@@ -115,15 +119,19 @@ const Confetti = () => {
       });
     };
 
-    animate();
+    const animTimeout = setTimeout(() => {
+      animate();
+    }, 100);
 
-    const timeout = setTimeout(() => {
+    const cleanupTimeout = setTimeout(() => {
       confettiElements.forEach((c) => c.el.remove());
     }, 5000);
 
     return () => {
-      cancelAnimationFrame(frame);
       clearTimeout(timeout);
+      clearTimeout(animTimeout);
+      clearTimeout(cleanupTimeout);
+      cancelAnimationFrame(frame);
       confettiElements.forEach((c) => c.el.remove());
     };
   }, []);
