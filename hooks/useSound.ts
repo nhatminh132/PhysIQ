@@ -2,8 +2,15 @@
 
 import { useCallback, useRef } from 'react';
 
-export const useSound = () => {
+interface CustomSounds {
+  correct?: string;
+  finish?: string;
+}
+
+export const useSound = (customSounds?: CustomSounds) => {
   const audioContextRef = useRef<AudioContext | null>(null);
+  const correctAudioRef = useRef<HTMLAudioElement | null>(null);
+  const finishAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const getAudioContext = useCallback(() => {
     if (!audioContextRef.current) {
@@ -13,6 +20,19 @@ export const useSound = () => {
   }, []);
 
   const playCorrect = useCallback(() => {
+    if (!customSounds) return;
+    if (customSounds.correct) {
+      if (!correctAudioRef.current) {
+        correctAudioRef.current = new Audio(customSounds.correct);
+      }
+      correctAudioRef.current.currentTime = 0;
+      correctAudioRef.current.play().catch(() => {});
+    } else {
+      playDefaultCorrect();
+    }
+  }, [customSounds]);
+
+  const playDefaultCorrect = useCallback(() => {
     try {
       const ctx = getAudioContext();
       const oscillator = ctx.createOscillator();
@@ -58,5 +78,16 @@ export const useSound = () => {
     }
   }, [getAudioContext]);
 
-  return { playCorrect, playWrong };
+  const playFinish = useCallback(() => {
+    if (!customSounds) return;
+    if (customSounds.finish) {
+      if (!finishAudioRef.current) {
+        finishAudioRef.current = new Audio(customSounds.finish);
+      }
+      finishAudioRef.current.currentTime = 0;
+      finishAudioRef.current.play().catch(() => {});
+    }
+  }, [customSounds]);
+
+  return { playCorrect, playWrong, playFinish, playDefaultCorrect };
 };

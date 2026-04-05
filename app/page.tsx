@@ -168,14 +168,22 @@ function PhysIQApp() {
   const [showSettings, setShowSettings] = useState(false);
   const [textOpacity, setTextOpacity] = useState(40);
   const [buttonOpacity, setButtonOpacity] = useState(40);
+  const [customSounds, setCustomSounds] = useState<{ correct?: string; finish?: string }>({});
 
-  const soundHook = useSound();
+  const soundHook = useSound(customSounds);
   const playCorrect = useCallback(() => {
     if (soundEnabled) soundHook.playCorrect();
   }, [soundEnabled, soundHook]);
   const playWrong = useCallback(() => {
     if (soundEnabled) soundHook.playWrong();
   }, [soundEnabled, soundHook]);
+
+  const preloadBackgrounds = useCallback((urls: string[]) => {
+    urls.forEach((url) => {
+      const img = new Image();
+      img.src = url;
+    });
+  }, []);
 
   const fetchQuestions = useCallback(async (quizSetId?: string) => {
     setQuestionsLoading(true);
@@ -253,6 +261,7 @@ function PhysIQApp() {
         } else {
           setScreen('result');
           setShowConfetti(true);
+          soundHook.playFinish?.();
           saveQuizAttempt(newAnswers);
         }
       }, 500);
@@ -326,10 +335,18 @@ function PhysIQApp() {
       const shuffledBgs = [...licenseInfo.customConfig.backgrounds].sort(() => Math.random() - 0.5);
       setCustomBackgrounds(shuffledBgs);
       setCurrentBackgroundIndex(0);
+      preloadBackgrounds(shuffledBgs);
     }
     
     if (licenseInfo?.customConfig?.button_color) {
       setButtonColor(licenseInfo.customConfig.button_color);
+    }
+
+    if (licenseInfo?.customConfig?.correct_sound || licenseInfo?.customConfig?.finish_sound) {
+      setCustomSounds({
+        correct: licenseInfo.customConfig.correct_sound,
+        finish: licenseInfo.customConfig.finish_sound,
+      });
     }
     
     setScreen('quiz');

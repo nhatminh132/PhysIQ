@@ -13,6 +13,8 @@ export interface LicenseInfo {
   customConfig?: {
     backgrounds?: string[];
     button_color?: string;
+    correct_sound?: string;
+    finish_sound?: string;
   };
 }
 
