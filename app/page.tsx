@@ -260,8 +260,8 @@ function PhysIQApp() {
           }
         } else {
           setScreen('result');
-          setShowConfetti(true);
           soundHook.playFinish?.();
+          setTimeout(() => setShowConfetti(true), 100);
           saveQuizAttempt(newAnswers);
         }
       }, 500);
@@ -355,6 +355,7 @@ function PhysIQApp() {
   const restartQuiz = () => {
     setCurrentQuestion(0);
     setAnswers([]);
+    setShowConfetti(false);
     setScreen('start');
   };
 
@@ -760,7 +761,7 @@ function PhysIQApp() {
 
     return (
       <div 
-        className="min-h-screen text-foreground flex items-center justify-center p-4"
+        className="min-h-screen text-foreground flex items-center justify-center p-4 relative"
         style={resultBgImage ? { 
           backgroundImage: `url(${resultBgImage})`, 
           backgroundSize: 'cover', 
@@ -769,7 +770,7 @@ function PhysIQApp() {
         } : {}}
       >
         {showConfetti && <Confetti />}
-        <div className="w-full max-w-lg">
+        <div className="w-full max-w-lg relative z-10">
           <div className="text-center mb-12">
             <h1 className="text-5xl font-bold mb-2">{score}/{shuffledQuestions.length}</h1>
             <p className="text-2xl font-semibold text-foreground mb-2">{rating}</p>
