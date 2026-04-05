@@ -157,7 +157,6 @@ function PhysIQApp() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
   const [feedback, setFeedback] = useState<FeedbackType>(null);
-  const [showConfetti, setShowConfetti] = useState(false);
   const [shuffledQuestions, setShuffledQuestions] = useState<QuizQuestion[]>(LOCAL_QUESTIONS);
   const [customBackgrounds, setCustomBackgrounds] = useState<string[]>([]);
   const [currentBackgroundIndex, setCurrentBackgroundIndex] = useState(0);
@@ -261,7 +260,6 @@ function PhysIQApp() {
         } else {
           setScreen('result');
           soundHook.playFinish?.();
-          setTimeout(() => setShowConfetti(true), 100);
           saveQuizAttempt(newAnswers);
         }
       }, 500);
@@ -355,7 +353,6 @@ function PhysIQApp() {
   const restartQuiz = () => {
     setCurrentQuestion(0);
     setAnswers([]);
-    setShowConfetti(false);
     setScreen('start');
   };
 
@@ -769,7 +766,6 @@ function PhysIQApp() {
           backgroundRepeat: 'no-repeat'
         } : {}}
       >
-        {showConfetti && <Confetti />}
         <div className="w-full max-w-lg relative z-10">
           <div className="text-center mb-12">
             <h1 className="text-5xl font-bold mb-2">{score}/{shuffledQuestions.length}</h1>
@@ -857,7 +853,11 @@ function PhysIQApp() {
     );
   }
 
-  return null;
+  return (
+    <>
+      {screen === 'result' && <Confetti />}
+    </>
+  );
 }
 
 export default AppWrapper;
