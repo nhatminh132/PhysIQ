@@ -692,8 +692,14 @@ function PhysIQApp() {
               <button
                 key={index}
                 onClick={() => handleAnswer(index)}
-                className="w-full p-5 text-left border border-border bg-secondary/30 hover:bg-secondary/60 rounded-lg transition-colors duration-200 font-medium flex items-center gap-4"
-                style={buttonColor ? { borderColor: buttonColor, '--tw-border-color': buttonColor } as React.CSSProperties : {}}
+                className="w-full p-5 text-left border border-border hover:bg-secondary/60 rounded-lg transition-colors duration-200 font-medium flex items-center gap-4"
+                style={buttonColor ? { 
+                  borderColor: buttonColor, 
+                  backgroundColor: `rgba(30, 30, 30, ${buttonBgOpacity})`,
+                  '--tw-border-color': buttonColor 
+                } as React.CSSProperties : {
+                  backgroundColor: `rgba(30, 30, 30, ${buttonBgOpacity})`,
+                }}
               >
                 <kbd 
                   className="flex items-center justify-center w-8 h-8 rounded font-mono text-sm text-white"
