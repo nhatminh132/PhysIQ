@@ -583,7 +583,7 @@ function PhysIQApp() {
           >
             Bắt đầu Quiz
           </button>
-          <p className="text-center text-xs text-muted-foreground/40 mt-6">v48</p>
+          <p className="text-center text-xs text-muted-foreground/40 mt-6">v49</p>
         </div>
       </div>
     );
@@ -855,7 +855,7 @@ function PhysIQApp() {
             Làm lại Quiz
           </button>
 
-          <p className="text-center text-xs text-muted-foreground/40 mt-6">v48</p>
+          <p className="text-center text-xs text-muted-foreground/40 mt-6">v49</p>
         </div>
       </div>
     );
