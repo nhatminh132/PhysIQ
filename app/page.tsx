@@ -5,6 +5,7 @@ import { useSound } from '@/hooks/useSound';
 import { useLicense } from '@/hooks/useLicense';
 import { Eye, EyeOff, Volume2, VolumeX, Keyboard, LogOut, Settings } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
+import confetti from 'canvas-confetti';
 import LoadingScreen from '@/components/LoadingScreen';
 import LockScreen from '@/components/LockScreen';
 
@@ -66,77 +67,32 @@ const LOCAL_QUESTIONS: QuizQuestion[] = [
 type Screen = 'locked' | 'start' | 'quiz' | 'result';
 type FeedbackType = 'correct' | 'wrong' | null;
 
-const Confetti = () => {
-  const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8'];
+const triggerConfetti = () => {
+  const duration = 3000;
+  const end = Date.now() + duration;
 
-  useEffect(() => {
-    const confettiCount = 200;
-    const confettiElements: { el: HTMLDivElement; x: number; y: number; vx: number; vy: number; rotation: number; rotationSpeed: number }[] = [];
+  const frame = () => {
+    confetti({
+      particleCount: 5,
+      angle: 60,
+      spread: 55,
+      origin: { x: 0 },
+      colors: ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8'],
+    });
+    confetti({
+      particleCount: 5,
+      angle: 120,
+      spread: 55,
+      origin: { x: 1 },
+      colors: ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8'],
+    });
 
-    const createConfetti = () => {
-      for (let i = 0; i < confettiCount; i++) {
-        const el = document.createElement('div');
-        el.style.position = 'fixed';
-        el.style.left = '0';
-        el.style.top = '-10px';
-        el.style.width = `${Math.random() * 10 + 5}px`;
-        el.style.height = `${Math.random() * 10 + 5}px`;
-        el.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        el.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-        el.style.zIndex = '9999';
-        el.style.pointerEvents = 'none';
-        document.body.appendChild(el);
+    if (Date.now() < end) {
+      requestAnimationFrame(frame);
+    }
+  };
 
-        confettiElements.push({
-          el,
-          x: Math.random() * window.innerWidth,
-          y: -20,
-          vx: (Math.random() - 0.5) * 4,
-          vy: Math.random() * 3 + 2,
-          rotation: Math.random() * 360,
-          rotationSpeed: (Math.random() - 0.5) * 10,
-        });
-      }
-    };
-
-    const timeout = setTimeout(createConfetti, 50);
-
-    let frame: number;
-    const animate = () => {
-      confettiElements.forEach((c) => {
-        c.x += c.vx;
-        c.y += c.vy;
-        c.vy += 0.1;
-        c.rotation += c.rotationSpeed;
-
-        c.el.style.left = `${c.x}px`;
-        c.el.style.top = `${c.y}px`;
-        c.el.style.transform = `rotate(${c.rotation}deg)`;
-
-        if (c.y < window.innerHeight + 100) {
-          frame = requestAnimationFrame(animate);
-        }
-      });
-    };
-
-    const animTimeout = setTimeout(() => {
-      animate();
-    }, 100);
-
-    const cleanupTimeout = setTimeout(() => {
-      confettiElements.forEach((c) => c.el.remove());
-    }, 5000);
-
-    return () => {
-      clearTimeout(timeout);
-      clearTimeout(animTimeout);
-      clearTimeout(cleanupTimeout);
-      cancelAnimationFrame(frame);
-      confettiElements.forEach((c) => c.el.remove());
-    };
-  }, []);
-
-  return null;
+  frame();
 };
 
 function AppWrapper() {
@@ -583,7 +539,7 @@ function PhysIQApp() {
           >
             Bắt đầu Quiz
           </button>
-          <p className="text-center text-xs text-muted-foreground/40 mt-6">v49</p>
+          <p className="text-center text-xs text-muted-foreground/40 mt-6">v50</p>
         </div>
       </div>
     );
@@ -855,17 +811,19 @@ function PhysIQApp() {
             Làm lại Quiz
           </button>
 
-          <p className="text-center text-xs text-muted-foreground/40 mt-6">v49</p>
+          <p className="text-center text-xs text-muted-foreground/40 mt-6">v50</p>
         </div>
       </div>
     );
   }
 
-  return (
-    <>
-      {(screen as string) === 'result' && <Confetti />}
-    </>
-  );
+  useEffect(() => {
+    if ((screen as string) === 'result') {
+      triggerConfetti();
+    }
+  }, [screen]);
+
+  return null;
 }
 
 export default AppWrapper;
